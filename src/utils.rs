@@ -15,7 +15,7 @@ pub fn to_option<T: Copy>(val: *const c_void) -> Option<T> {
 
 pub fn to_panic<T: Copy>(val: *const c_void) -> T {
     if val.is_null() {
-        panic!("Extension function not aviable!")
+        panic!("Extension function not available!")
     } else {
         unsafe { transmute_copy(&val) }
     }

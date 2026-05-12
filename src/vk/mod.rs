@@ -23,6 +23,7 @@ pub use types::*;
 
 use crate::utils::{read_into_vec_result, to_option};
 
+use crate::vk;
 pub use crate::vkGetInstanceProcAddr as get_instance_proc_addr;
 
 pub type Result<T> = std::result::Result<T, Error>;
@@ -30,7 +31,7 @@ pub type Result<T> = std::result::Result<T, Error>;
 /// <https://docs.vulkan.org/refpages/latest/refpages/source/vkEnumerateInstanceLayerProperties.html>
 pub fn enumerate_instance_layer_properties() -> Result<Vec<LayerProperties>> {
     let pfn: vkEnumerateInstanceLayerProperties = to_option(unsafe {
-        transmute(get_instance_proc_addr(
+        transmute::<vk::PFN_vkVoidFunction, *const std::ffi::c_void>(get_instance_proc_addr(
             vkInstance::null(),
             c"vkEnumerateInstanceLayerProperties".as_ptr(),
         ))
@@ -44,7 +45,7 @@ pub fn enumerate_instance_extension_properties(
     layer_name: Option<&CStr>,
 ) -> Result<Vec<ExtensionProperties>> {
     let pfn: vkEnumerateInstanceExtensionProperties = to_option(unsafe {
-        transmute(get_instance_proc_addr(
+        transmute::<vk::PFN_vkVoidFunction, *const std::ffi::c_void>(get_instance_proc_addr(
             vkInstance::null(),
             c"vkEnumerateInstanceExtensionProperties".as_ptr(),
         ))
@@ -65,7 +66,7 @@ pub fn enumerate_instance_extension_properties(
 /// it just returns [`API_VERSION_1_0`] if the fn is not available!
 pub fn enumerate_instance_version() -> u32 {
     let pfn: Option<vkEnumerateInstanceVersion> = to_option(unsafe {
-        transmute(get_instance_proc_addr(
+        transmute::<vk::PFN_vkVoidFunction, *const std::ffi::c_void>(get_instance_proc_addr(
             vkInstance::null(),
             c"vkEnumerateInstanceVersion".as_ptr(),
         ))
