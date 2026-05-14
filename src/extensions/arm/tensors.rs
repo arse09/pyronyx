@@ -11,7 +11,7 @@ use core::ptr::{from_ref, null};
 
 /// Type: `Device`
 pub const NAME: &CStr = c"VK_ARM_tensors";
-pub const SPEC_VERSION: u32 = 1;
+pub const SPEC_VERSION: u32 = 2;
 
 pub trait TensorsDevice {
     fn create_tensor(

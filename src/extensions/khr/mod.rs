@@ -380,11 +380,25 @@ pub mod shader_terminate_invocation {
     pub const SPEC_VERSION: u32 = 1;
 }
 pub mod fragment_shading_rate;
+pub mod shader_constant_data {
+    use core::ffi::CStr;
+
+    /// Type: `Device`
+    pub const NAME: &CStr = c"VK_KHR_shader_constant_data";
+    pub const SPEC_VERSION: u32 = 1;
+}
 pub mod dynamic_rendering_local_read {
     use core::ffi::CStr;
 
     /// Type: `Device`
     pub const NAME: &CStr = c"VK_KHR_dynamic_rendering_local_read";
+    pub const SPEC_VERSION: u32 = 1;
+}
+pub mod shader_abort {
+    use core::ffi::CStr;
+
+    /// Type: `Device`
+    pub const NAME: &CStr = c"VK_KHR_shader_abort";
     pub const SPEC_VERSION: u32 = 1;
 }
 pub mod shader_quad_control {
@@ -476,6 +490,7 @@ pub mod synchronization2 {
     pub const NAME: &CStr = c"VK_KHR_synchronization2";
     pub const SPEC_VERSION: u32 = 1;
 }
+pub mod device_address_commands;
 pub mod fragment_shader_barycentric {
     use core::ffi::CStr;
 
@@ -708,6 +723,7 @@ pub mod maintenance7 {
     pub const NAME: &CStr = c"VK_KHR_maintenance7";
     pub const SPEC_VERSION: u32 = 1;
 }
+pub mod device_fault;
 pub mod maintenance8 {
     use core::ffi::CStr;
 
@@ -758,3 +774,10 @@ pub mod present_mode_fifo_latest_ready {
     pub const SPEC_VERSION: u32 = 1;
 }
 pub mod maintenance10;
+pub mod maintenance11 {
+    use core::ffi::CStr;
+
+    /// Type: `Device`
+    pub const NAME: &CStr = c"VK_KHR_maintenance11";
+    pub const SPEC_VERSION: u32 = 1;
+}

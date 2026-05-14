@@ -2,7 +2,8 @@ use std::env;
 use std::path::PathBuf;
 use std::process::Command;
 
-// This is still very wip, please make a issue on github if something doesn't work!
+// This is still higly unstable und not finished
+// Feel free to contribute if you want to implement or fix it for you platform
 
 fn main() {
     println!("cargo:rerun-if-env-changed=VULKAN_SDK");
@@ -29,10 +30,7 @@ fn handle_desktop_linking(target_family: &str, target_pointer_width: &str) {
             ("windows", "64") => "Lib",
             _ => "lib",
         };
-
-        let search_path = format!("{vulkan_sdk}/{suffix}");
-        println!("cargo:rustc-link-search={search_path}");
-
+        println!("cargo:rustc-link-search={vulkan_sdk}/{suffix}");
         let lib = if target_family == "windows" {
             "vulkan-1"
         } else {
@@ -42,56 +40,44 @@ fn handle_desktop_linking(target_family: &str, target_pointer_width: &str) {
         return;
     }
 
-    // Only attempt system-level fallbacks on non-Windows targets.
-    // On Windows the LunarG SDK is practically mandatory; we warn accordingly.
     if target_family == "windows" {
         println!(
             "cargo::warning=VULKAN_SDK is not set. \
              Vulkan linking will fail on Windows. \
-             Please install the LunarG Vulkan SDK from https://vulkan.lunarg.com/sdk/home"
+             Please install the LunarG Vulkan SDK: https://vulkan.lunarg.com/sdk/home"
         );
         return;
     }
 
-    // ── 2. pkg-config (works after `apt install libvulkan-dev`) ───────────
+    // ── 2. pkg-config ─────────────────────────────────────────────────────
     if try_pkgconfig_vulkan() {
         return;
     }
 
-    // ── 3. Manual search of well-known system library paths ───────────────
+    // ── 3. Well-known system paths (tries all distros, first hit wins) ────
     if try_system_vulkan_paths() {
         return;
     }
 
-    // ── Nothing worked – emit a helpful, actionable error ─────────────────
     emit_install_hint();
 }
 
-/// Tries to resolve Vulkan through `pkg-config`.
-/// Returns `true` if linking was configured successfully.
 fn try_pkgconfig_vulkan() -> bool {
-    // Query library search paths from pkg-config
-    let libs_output = Command::new("pkg-config")
+    let search = Command::new("pkg-config")
         .args(["--libs-only-L", "vulkan"])
         .output();
-
-    let link_output = Command::new("pkg-config")
+    let link = Command::new("pkg-config")
         .args(["--libs-only-l", "vulkan"])
         .output();
 
-    match (libs_output, link_output) {
-        (Ok(search), Ok(link)) if search.status.success() && link.status.success() => {
-            // -L/some/path  →  emit rustc-link-search for each path
-            let paths = String::from_utf8_lossy(&search.stdout);
-            for token in paths.split_whitespace() {
+    match (search, link) {
+        (Ok(s), Ok(l)) if s.status.success() && l.status.success() => {
+            for token in String::from_utf8_lossy(&s.stdout).split_whitespace() {
                 if let Some(path) = token.strip_prefix("-L") {
                     println!("cargo:rustc-link-search=native={path}");
                 }
             }
-
-            // -lvulkan  →  emit rustc-link-lib for each lib
-            let libs = String::from_utf8_lossy(&link.stdout);
-            for token in libs.split_whitespace() {
+            for token in String::from_utf8_lossy(&l.stdout).split_whitespace() {
                 if let Some(lib) = token.strip_prefix("-l") {
                     println!("cargo:rustc-link-lib={lib}");
                 }
@@ -102,69 +88,60 @@ fn try_pkgconfig_vulkan() -> bool {
     }
 }
 
-/// Resolves the exact directory where `apt install libvulkan-dev` places the library.
-/// Debian/Ubuntu/Raspberry Pi OS always use the multiarch path derived from the target triple.
-/// Returns `true` if the library was found and linking was configured.
+/// Probes all known distro-specific paths for libvulkan.so – no distro
+/// detection needed, just try them all and use the first hit.
+///
+/// Layout by distro family:
+///   Debian/Ubuntu  →  /usr/lib/<multiarch-triple>/
+///   Fedora/RHEL    →  /usr/lib64/
+///   Arch/Alpine/…  →  /usr/lib/
 fn try_system_vulkan_paths() -> bool {
-    // Map Cargo target arch → Debian multiarch tuple.
-    // These are the install paths written by dpkg – no scanning needed.
-    let multiarch_dir = match env::var("CARGO_CFG_TARGET_ARCH")
-        .unwrap_or_default()
-        .as_str()
-    {
-        "aarch64" => "/usr/lib/aarch64-linux-gnu", // Raspberry Pi OS 64-bit, Ubuntu arm64
-        "arm" => "/usr/lib/arm-linux-gnueabihf",   // Raspberry Pi OS 32-bit
-        "x86_64" => "/usr/lib/x86_64-linux-gnu",   // Debian/Ubuntu amd64
-        "x86" => "/usr/lib/i386-linux-gnu",        // Debian/Ubuntu i386
-        "riscv64" => "/usr/lib/riscv64-linux-gnu",
-        // Non-multiarch distros (Arch, Alpine, Fedora) put libs here
-        _ => "/usr/lib",
+    let arch = env::var("CARGO_CFG_TARGET_ARCH").unwrap_or_default();
+
+    let candidates: &[&str] = match arch.as_str() {
+        "x86_64" => &[
+            "/usr/lib/x86_64-linux-gnu", // Debian/Ubuntu
+            "/usr/lib64",                // Fedora/RHEL/openSUSE
+            "/usr/lib",                  // Arch, Alpine, CachyOS, …
+        ],
+        "aarch64" => &["/usr/lib/aarch64-linux-gnu", "/usr/lib64", "/usr/lib"],
+        "arm" => &["/usr/lib/arm-linux-gnueabihf", "/usr/lib"],
+        "x86" => &["/usr/lib/i386-linux-gnu", "/usr/lib"],
+        "riscv64" => &["/usr/lib/riscv64-linux-gnu", "/usr/lib"],
+        _ => &["/usr/lib"],
     };
 
-    // libvulkan-dev installs libvulkan.so as a symlink to libvulkan.so.1
-    let lib = PathBuf::from(multiarch_dir).join("libvulkan.so");
-    if lib.exists() {
-        println!("cargo:rustc-link-search=native={multiarch_dir}");
-        println!("cargo:rustc-link-lib=vulkan");
-        return true;
+    for &dir in candidates {
+        if PathBuf::from(dir).join("libvulkan.so").exists() {
+            println!("cargo:rustc-link-search=native={dir}");
+            println!("cargo:rustc-link-lib=vulkan");
+            return true;
+        }
     }
 
     false
 }
 
-/// Emits a warning with OS-specific install instructions when no Vulkan
-/// library could be found through any of the supported mechanisms.
 fn emit_install_hint() {
-    // Detect the host OS at compile time so we can give the right command.
     let hint = if cfg!(target_os = "linux") {
-        // Try to identify the distro family for a more precise suggestion.
-        let is_debian = PathBuf::from("/etc/debian_version").exists()
-            || PathBuf::from("/etc/raspbian_version").exists();
-        let is_arch = PathBuf::from("/etc/arch-release").exists();
-        let is_fedora = PathBuf::from("/etc/fedora-release").exists()
-            || PathBuf::from("/etc/redhat-release").exists();
-
-        if is_debian {
-            "Run: sudo apt update && sudo apt install libvulkan-dev vulkan-tools"
-        } else if is_arch {
-            "Run: sudo pacman -S vulkan-icd-loader vulkan-headers"
-        } else if is_fedora {
-            "Run: sudo dnf install vulkan-loader-devel vulkan-tools"
-        } else {
-            "Install the Vulkan loader development package for your distribution \
-             (e.g. libvulkan-dev on Debian/Ubuntu, vulkan-icd-loader on Arch, \
-             vulkan-loader-devel on Fedora)"
-        }
+        "Install the Vulkan dev package for your distro:\n\
+         \n\
+         Debian / Ubuntu / Mint:   sudo apt install libvulkan-dev vulkan-tools\n\
+         Arch / Manjaro / CachyOS: sudo pacman -S vulkan-icd-loader vulkan-headers\n\
+         Fedora / RHEL / Alma:     sudo dnf install vulkan-loader-devel vulkan-tools\n\
+         openSUSE:                 sudo zypper install vulkan-devel\n\
+         Alpine:                   sudo apk add vulkan-loader-dev"
     } else if cfg!(target_os = "macos") {
-        "Install the LunarG Vulkan SDK from https://vulkan.lunarg.com/sdk/home \
-         or use MoltenVK via Homebrew: brew install molten-vk"
+        "Install the LunarG Vulkan SDK: https://vulkan.lunarg.com/sdk/home\n\
+         or via Homebrew: brew install molten-vk"
     } else {
-        "Install the LunarG Vulkan SDK from https://vulkan.lunarg.com/sdk/home"
+        "Install the LunarG Vulkan SDK: https://vulkan.lunarg.com/sdk/home"
     };
 
     println!(
         "cargo::warning=No Vulkan library found. Linking will fail.\n\
-         Tried: VULKAN_SDK env var, pkg-config, and common system library paths.\n\
+         Tried: VULKAN_SDK env var, pkg-config, and common system paths.\n\
+         \n\
          {hint}"
     );
 }
@@ -176,18 +153,17 @@ fn handle_android_linking() {
         .map(PathBuf::from)
         .or_else(|| env::var("ANDROID_NDK_HOME").map(PathBuf::from).ok())
     {
-        Some(path) if path.is_dir() => path,
+        Some(p) if p.is_dir() => p,
         _ => {
             println!(
                 "cargo::warning=ANDROID_NDK_HOME is not set. \
                  Vulkan linking for Android will fail. \
-                 Please install the Android NDK from https://developer.android.com/ndk/downloads"
+                 Install the Android NDK: https://developer.android.com/ndk/downloads"
             );
             return;
         }
     };
 
-    // Find host toolchain directory (linux-x86_64, darwin-x86_64, windows-x86_64, …)
     let host = if cfg!(target_os = "windows") {
         "windows-x86_64"
     } else if cfg!(target_os = "macos") {
@@ -205,28 +181,6 @@ fn handle_android_linking() {
         return;
     }
 
-    // Find the highest API level directory (e.g. 35 > 34 > 33 …)
-    let sysroot_lib = prebuilt.join("sysroot/usr/lib");
-    if !sysroot_lib.is_dir() {
-        println!("cargo::warning=NDK sysroot not found");
-        return;
-    }
-
-    let latest_api = std::fs::read_dir(&sysroot_lib)
-        .into_iter()
-        .flatten()
-        .filter_map(|entry| {
-            let path = entry.unwrap().path();
-            if path.is_dir() {
-                path.file_name()?.to_str()?.parse::<u32>().ok()
-            } else {
-                None
-            }
-        })
-        .max()
-        .unwrap_or(34); // fallback
-
-    // Target architecture directory (aarch64-linux-android, x86_64-linux-android, …)
     let target_arch = match env::var("CARGO_CFG_TARGET_ARCH")
         .unwrap_or_default()
         .as_str()
@@ -236,13 +190,38 @@ fn handle_android_linking() {
         "x86_64" => "x86_64-linux-android",
         "x86" => "i686-linux-android",
         arch => {
-            println!("cargo::warning=Unknown Android architecture: {}", arch);
+            println!("cargo::warning=Unknown Android architecture: {arch}");
             return;
         }
     };
 
-    let lib_path = sysroot_lib.join(target_arch).join(latest_api.to_string());
+    // NDK layout: sysroot/usr/lib/<abi>/<api-level>/libvulkan.so
+    // The original code scanned the wrong directory (sysroot/usr/lib instead
+    // of sysroot/usr/lib/<abi>), so latest_api always fell back to 34.
+    let abi_dir = prebuilt.join("sysroot/usr/lib").join(target_arch);
+    if !abi_dir.is_dir() {
+        println!(
+            "cargo::warning=NDK sysroot ABI directory not found: {:?}",
+            abi_dir
+        );
+        return;
+    }
 
+    let latest_api = std::fs::read_dir(&abi_dir)
+        .into_iter()
+        .flatten()
+        .filter_map(|e| {
+            let path = e.ok()?.path();
+            if path.is_dir() {
+                path.file_name()?.to_str()?.parse::<u32>().ok()
+            } else {
+                None
+            }
+        })
+        .max()
+        .unwrap_or(34);
+
+    let lib_path = abi_dir.join(latest_api.to_string());
     println!("cargo:rustc-link-search=native={}", lib_path.display());
-    println!("cargo:rustc-link-lib=vulkan"); // libvulkan.so from NDK
+    println!("cargo:rustc-link-lib=vulkan");
 }

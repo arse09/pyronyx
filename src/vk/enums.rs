@@ -775,6 +775,9 @@ pub enum Format {
     Astc6x6x6SrgbBlockEXT = 1000288028,
     Astc6x6x6SfloatBlockEXT = 1000288029,
     R8BoolARM = 1000460000,
+    R16SfloatFpencodingBfloat16ARM = 1000460001,
+    R8SfloatFpencodingFloat8E4M3ARM = 1000460002,
+    R8SfloatFpencodingFloat8E5M2ARM = 1000460003,
     R16G16Sfixed5NV = 1000464000,
     R10X6UintPack16ARM = 1000609000,
     R10X6G10X6Uint2Pack16ARM = 1000609001,
@@ -913,12 +916,12 @@ pub enum StructureType {
     PhysicalDeviceMultiviewFeatures = 1000053001,
     PhysicalDeviceMultiviewProperties = 1000053002,
     PhysicalDeviceShaderDrawParametersFeatures = 1000063000,
+    PhysicalDeviceDriverProperties = 1000196000,
     PhysicalDeviceVulkan11Features = 49,
     PhysicalDeviceVulkan11Properties = 50,
     PhysicalDeviceVulkan12Features = 51,
     PhysicalDeviceVulkan12Properties = 52,
     ImageFormatListCreateInfo = 1000147000,
-    PhysicalDeviceDriverProperties = 1000196000,
     PhysicalDeviceVulkanMemoryModelFeatures = 1000211000,
     PhysicalDeviceHostQueryResetFeatures = 1000261000,
     PhysicalDeviceTimelineSemaphoreFeatures = 1000207000,
@@ -1330,6 +1333,7 @@ pub enum StructureType {
     PipelineRepresentativeFragmentTestStateCreateInfoNV = 1000166001,
     PhysicalDeviceImageViewImageFormatInfoEXT = 1000170000,
     FilterCubicImageViewImageFormatPropertiesEXT = 1000170001,
+    PhysicalDeviceCooperativeMatrixConversionFeaturesQCOM = 1000172000,
     ImportMemoryHostPointerInfoEXT = 1000178000,
     MemoryHostPointerPropertiesEXT = 1000178001,
     PhysicalDeviceExternalMemoryHostPropertiesEXT = 1000178002,
@@ -1388,6 +1392,10 @@ pub enum StructureType {
     RenderingFragmentShadingRateAttachmentInfoKHR = 1000044006,
     PhysicalDeviceShaderCoreProperties2AMD = 1000227000,
     PhysicalDeviceCoherentMemoryFeaturesAMD = 1000229000,
+    PhysicalDeviceShaderConstantDataFeaturesKHR = 1000231000,
+    PhysicalDeviceShaderAbortFeaturesKHR = 1000233000,
+    DeviceFaultShaderAbortMessageInfoKHR = 1000233001,
+    PhysicalDeviceShaderAbortPropertiesKHR = 1000233002,
     PhysicalDeviceShaderImageAtomicInt64FeaturesEXT = 1000234000,
     PhysicalDeviceShaderQuadControlFeaturesKHR = 1000235000,
     PhysicalDeviceMemoryBudgetPropertiesEXT = 1000237000,
@@ -1470,6 +1478,9 @@ pub enum StructureType {
     VideoEncodeSessionParametersFeedbackInfoKHR = 1000299010,
     PhysicalDeviceDiagnosticsConfigFeaturesNV = 1000300000,
     DeviceDiagnosticsConfigCreateInfoNV = 1000300001,
+    PerfHintInfoQCOM = 1000302000,
+    PhysicalDeviceQueuePerfHintFeaturesQCOM = 1000302001,
+    PhysicalDeviceQueuePerfHintPropertiesQCOM = 1000302002,
     CudaModuleCreateInfoNV = 1000307000,
     CudaFunctionCreateInfoNV = 1000307001,
     CudaLaunchInfoNV = 1000307002,
@@ -1508,6 +1519,22 @@ pub enum StructureType {
     DescriptorBufferBindingInfoEXT = 1000316011,
     DescriptorBufferBindingPushDescriptorBufferHandleEXT = 1000316012,
     AccelerationStructureCaptureDescriptorDataInfoEXT = 1000316009,
+    DeviceMemoryCopyKHR = 1000318000,
+    CopyDeviceMemoryInfoKHR = 1000318001,
+    DeviceMemoryImageCopyKHR = 1000318002,
+    CopyDeviceMemoryImageInfoKHR = 1000318003,
+    MemoryRangeBarriersInfoKHR = 1000318004,
+    MemoryRangeBarrierKHR = 1000318005,
+    PhysicalDeviceDeviceAddressCommandsFeaturesKHR = 1000318006,
+    BindIndexBuffer3InfoKHR = 1000318007,
+    BindVertexBuffer3InfoKHR = 1000318008,
+    DrawIndirect2InfoKHR = 1000318009,
+    DrawIndirectCount2InfoKHR = 1000318010,
+    DispatchIndirect2InfoKHR = 1000318011,
+    ConditionalRenderingBeginInfo2EXT = 1000318012,
+    BindTransformFeedbackBuffer2InfoEXT = 1000318013,
+    MemoryMarkerInfoAMD = 1000318014,
+    AccelerationStructureCreateInfo2KHR = 1000318015,
     PhysicalDeviceGraphicsPipelineLibraryFeaturesEXT = 1000320000,
     PhysicalDeviceGraphicsPipelineLibraryPropertiesEXT = 1000320001,
     GraphicsPipelineLibraryCreateInfoEXT = 1000320002,
@@ -1630,6 +1657,8 @@ pub enum StructureType {
     DeviceQueueShaderCoreControlCreateInfoARM = 1000417000,
     PhysicalDeviceSchedulingControlsFeaturesARM = 1000417001,
     PhysicalDeviceSchedulingControlsPropertiesARM = 1000417002,
+    DispatchParametersARM = 1000417003,
+    PhysicalDeviceSchedulingControlsDispatchParametersPropertiesARM = 1000417004,
     PhysicalDeviceImageSlicedViewOf3DFeaturesEXT = 1000418000,
     ImageViewSlicedCreateInfoEXT = 1000418001,
     PhysicalDeviceDescriptorSetHostMappingFeaturesVALVE = 1000420000,
@@ -1805,6 +1834,7 @@ pub enum StructureType {
     QueueFamilyDataGraphPropertiesARM = 1000507018,
     PhysicalDeviceQueueFamilyDataGraphProcessingEngineInfoARM = 1000507019,
     DataGraphPipelineConstantTensorSemiStructuredSparsityInfoARM = 1000507015,
+    QueueFamilyDataGraphTOSAPropertiesARM = 1000508000,
     PhysicalDeviceMultiviewPerViewRenderAreasFeaturesQCOM = 1000510000,
     MultiviewPerViewRenderAreasRenderPassBeginInfoQCOM = 1000510001,
     PhysicalDeviceComputeShaderDerivativesFeaturesKHR = 1000201000,
@@ -1927,6 +1957,10 @@ pub enum StructureType {
     IndirectExecutionSetShaderLayoutInfoEXT = 1000572012,
     GeneratedCommandsPipelineInfoEXT = 1000572013,
     GeneratedCommandsShaderInfoEXT = 1000572014,
+    PhysicalDeviceFaultFeaturesKHR = 1000573000,
+    PhysicalDeviceFaultPropertiesKHR = 1000573001,
+    DeviceFaultInfoKHR = 1000573002,
+    DeviceFaultDebugInfoKHR = 1000573003,
     PhysicalDeviceMaintenance8FeaturesKHR = 1000574000,
     MemoryBarrierAccessFlags3KHR = 1000574002,
     PhysicalDeviceImageAlignmentControlFeaturesMESA = 1000575000,
@@ -1963,6 +1997,10 @@ pub enum StructureType {
     PerformanceCounterARM = 1000605002,
     PerformanceCounterDescriptionARM = 1000605003,
     RenderPassPerformanceCountersByRegionBeginInfoARM = 1000605004,
+    PhysicalDeviceShaderInstrumentationFeaturesARM = 1000607000,
+    PhysicalDeviceShaderInstrumentationPropertiesARM = 1000607001,
+    ShaderInstrumentationCreateInfoARM = 1000607002,
+    ShaderInstrumentationMetricDescriptionARM = 1000607003,
     PhysicalDeviceVertexAttributeRobustnessFeaturesEXT = 1000608000,
     PhysicalDeviceFormatPackFeaturesARM = 1000609000,
     PhysicalDeviceFragmentDensityMapLayeredFeaturesVALVE = 1000611000,
@@ -1988,13 +2026,32 @@ pub enum StructureType {
     RenderingAttachmentFlagsInfoKHR = 1000630002,
     RenderingEndInfoKHR = 1000619003,
     ResolveImageModeInfoKHR = 1000630004,
+    PhysicalDeviceDataGraphOpticalFlowFeaturesARM = 1000631000,
+    QueueFamilyDataGraphOpticalFlowPropertiesARM = 1000631001,
+    DataGraphOpticalFlowImageFormatInfoARM = 1000631003,
+    DataGraphOpticalFlowImageFormatPropertiesARM = 1000631004,
+    DataGraphPipelineOpticalFlowDispatchInfoARM = 1000631005,
+    DataGraphPipelineOpticalFlowCreateInfoARM = 1000631002,
+    DataGraphPipelineResourceInfoImageLayoutARM = 1000631006,
+    DataGraphPipelineSingleNodeCreateInfoARM = 1000631007,
+    DataGraphPipelineSingleNodeConnectionARM = 1000631008,
     PhysicalDeviceShaderLongVectorFeaturesEXT = 1000635000,
     PhysicalDeviceShaderLongVectorPropertiesEXT = 1000635001,
     PhysicalDevicePipelineCacheIncrementalModeFeaturesSEC = 1000637000,
     PhysicalDeviceShaderUniformBufferUnsizedArrayFeaturesEXT = 1000642000,
     ComputeOccupancyPriorityParametersNV = 1000645000,
     PhysicalDeviceComputeOccupancyPriorityFeaturesNV = 1000645001,
+    PhysicalDeviceMaintenance11FeaturesKHR = 1000657000,
+    QueueFamilyOptimalImageTransferGranularityPropertiesKHR = 1000657001,
     PhysicalDeviceShaderSubgroupPartitionedFeaturesEXT = 1000662000,
+    UbmSurfaceCreateInfoSEC = 1000664000,
+    PhysicalDeviceShaderMixedFloatDotProductFeaturesVALVE = 1000673000,
+    PhysicalDeviceThrottleHintFeaturesSEC = 1000674000,
+    ThrottleHintSubmitInfoSEC = 1000674001,
+    DataGraphPipelineNeuralStatisticsCreateInfoARM = 1000676000,
+    DataGraphPipelineSessionNeuralStatisticsCreateInfoARM = 1000676001,
+    PhysicalDeviceDataGraphNeuralAcceleratorStatisticsFeaturesARM = 1000676002,
+    PhysicalDevicePrimitiveRestartIndexFeaturesEXT = 1000678000,
 }
 
 impl StructureType {
@@ -2259,6 +2316,7 @@ pub enum ObjectType {
     ExternalComputeQueueNV = 1000556000,
     IndirectCommandsLayoutEXT = 1000572000,
     IndirectExecutionSetEXT = 1000572001,
+    ShaderInstrumentationARM = 1000607000,
 }
 
 /// <https://docs.vulkan.org/refpages/latest/refpages/source/VkRayTracingInvocationReorderModeEXT.html>
@@ -3410,10 +3468,10 @@ pub enum DepthBiasRepresentationEXT {
     Float = 2,
 }
 
-/// <https://docs.vulkan.org/refpages/latest/refpages/source/VkDeviceFaultAddressTypeEXT.html>
+/// <https://docs.vulkan.org/refpages/latest/refpages/source/VkDeviceFaultAddressTypeKHR.html>
 #[repr(C)]
 #[derive(Clone, Copy, Debug, Default, Hash, PartialEq, Eq)]
-pub enum DeviceFaultAddressTypeEXT {
+pub enum DeviceFaultAddressTypeKHR {
     /// Currently unused
     #[default]
     None = 0,
@@ -3425,10 +3483,10 @@ pub enum DeviceFaultAddressTypeEXT {
     InstructionPointerFault = 6,
 }
 
-/// <https://docs.vulkan.org/refpages/latest/refpages/source/VkDeviceFaultVendorBinaryHeaderVersionEXT.html>
+/// <https://docs.vulkan.org/refpages/latest/refpages/source/VkDeviceFaultVendorBinaryHeaderVersionKHR.html>
 #[repr(C)]
 #[derive(Clone, Copy, Debug, Default, Hash, PartialEq, Eq)]
-pub enum DeviceFaultVendorBinaryHeaderVersionEXT {
+pub enum DeviceFaultVendorBinaryHeaderVersionKHR {
     #[default]
     One = 1,
 }
@@ -3640,6 +3698,8 @@ pub enum DefaultVertexAttributeValueKHR {
 pub enum DataGraphPipelineSessionBindPointARM {
     #[default]
     Transient = 0,
+    OpticalFlowCache = 1000631001,
+    NeuralAcceleratorStatistics = 1000676000,
 }
 
 /// <https://docs.vulkan.org/refpages/latest/refpages/source/VkDataGraphPipelineSessionBindPointTypeARM.html>
@@ -3657,6 +3717,8 @@ pub enum DataGraphPipelinePropertyARM {
     #[default]
     CreationLog = 0,
     Identifier = 1,
+    NeuralAcceleratorDebugDatabase = 1000676000,
+    NeuralAcceleratorStatisticsInfo = 1000676001,
 }
 
 /// <https://docs.vulkan.org/refpages/latest/refpages/source/VkPhysicalDeviceDataGraphProcessingEngineTypeARM.html>
@@ -3677,6 +3739,7 @@ pub enum PhysicalDeviceDataGraphOperationTypeARM {
     SpirvExtendedInstructionSet = 0,
     NeuralModel = 1000629000,
     BuiltinModel = 1000629001,
+    OpticalFlow = 1000631000,
 }
 
 /// <https://docs.vulkan.org/refpages/latest/refpages/source/VkDataGraphModelCacheTypeQCOM.html>
@@ -3685,6 +3748,27 @@ pub enum PhysicalDeviceDataGraphOperationTypeARM {
 pub enum DataGraphModelCacheTypeQCOM {
     #[default]
     GenericBinary = 0,
+}
+
+/// <https://docs.vulkan.org/refpages/latest/refpages/source/VkPerfHintTypeQCOM.html>
+#[repr(C)]
+#[derive(Clone, Copy, Debug, Default, Hash, PartialEq, Eq)]
+pub enum PerfHintTypeQCOM {
+    #[default]
+    Default = 0,
+    FrequencyMin = 1,
+    FrequencyMax = 2,
+    FrequencyScaled = 3,
+}
+
+/// <https://docs.vulkan.org/refpages/latest/refpages/source/VkThrottleHintTypeSEC.html>
+#[repr(C)]
+#[derive(Clone, Copy, Debug, Default, Hash, PartialEq, Eq)]
+pub enum ThrottleHintTypeSEC {
+    #[default]
+    Default = 0,
+    Low = 1,
+    High = 2,
 }
 
 /// <https://docs.vulkan.org/refpages/latest/refpages/source/VkDescriptorMappingSourceEXT.html>
@@ -3703,4 +3787,54 @@ pub enum DescriptorMappingSourceEXT {
     HeapWithShaderRecordIndex = 8,
     ShaderRecordData = 9,
     ShaderRecordAddress = 10,
+}
+
+/// <https://docs.vulkan.org/refpages/latest/refpages/source/VkDataGraphTOSALevelARM.html>
+#[repr(C)]
+#[derive(Clone, Copy, Debug, Default, Hash, PartialEq, Eq)]
+pub enum DataGraphTOSALevelARM {
+    #[default]
+    None = 0,
+    Type8K = 1,
+}
+
+/// <https://docs.vulkan.org/refpages/latest/refpages/source/VkDataGraphOpticalFlowPerformanceLevelARM.html>
+#[repr(C)]
+#[derive(Clone, Copy, Debug, Default, Hash, PartialEq, Eq)]
+pub enum DataGraphOpticalFlowPerformanceLevelARM {
+    #[default]
+    Unknown = 0,
+    Slow = 1,
+    Medium = 2,
+    Fast = 3,
+}
+
+/// <https://docs.vulkan.org/refpages/latest/refpages/source/VkDataGraphPipelineNodeConnectionTypeARM.html>
+#[repr(C)]
+#[derive(Clone, Copy, Debug, Default, Hash, PartialEq, Eq)]
+pub enum DataGraphPipelineNodeConnectionTypeARM {
+    #[default]
+    OpticalFlowInput = 1000631000,
+    OpticalFlowReference = 1000631001,
+    OpticalFlowHint = 1000631002,
+    OpticalFlowFlowVector = 1000631003,
+    OpticalFlowCost = 1000631004,
+}
+
+/// <https://docs.vulkan.org/refpages/latest/refpages/source/VkDataGraphPipelineNodeTypeARM.html>
+#[repr(C)]
+#[derive(Clone, Copy, Debug, Default, Hash, PartialEq, Eq)]
+pub enum DataGraphPipelineNodeTypeARM {
+    #[default]
+    OpticalFlow = 1000631000,
+}
+
+/// <https://docs.vulkan.org/refpages/latest/refpages/source/VkNeuralAcceleratorStatisticsModeARM.html>
+#[repr(C)]
+#[derive(Clone, Copy, Debug, Default, Hash, PartialEq, Eq)]
+pub enum NeuralAcceleratorStatisticsModeARM {
+    #[default]
+    Disabled = 0,
+    Statistics0 = 1,
+    Statistics1 = 2,
 }

@@ -1163,6 +1163,30 @@ impl fmt::Pointer for DataGraphPipelineSessionARM {
 
 #[repr(transparent)]
 #[derive(Copy, Clone, PartialEq, Eq, Hash, Default)]
+pub struct ShaderInstrumentationARM(pub u64);
+impl ShaderInstrumentationARM {
+    #[inline]
+    pub const fn null() -> Self {
+        Self(0)
+    }
+    #[inline]
+    pub const fn is_null(self) -> bool {
+        self.0 == 0
+    }
+}
+impl fmt::Debug for ShaderInstrumentationARM {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "ShaderInstrumentationARM(0x{:x})", self.0)
+    }
+}
+impl fmt::Pointer for ShaderInstrumentationARM {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        fmt::Debug::fmt(&self, f)
+    }
+}
+
+#[repr(transparent)]
+#[derive(Copy, Clone, PartialEq, Eq, Hash, Default)]
 pub struct DisplayKHR(pub u64);
 impl DisplayKHR {
     #[inline]
@@ -1392,6 +1416,7 @@ pub type LineRasterizationModeKHR = LineRasterizationMode;
 pub type LineRasterizationModeEXT = LineRasterizationMode;
 pub type PipelineRobustnessBufferBehaviorEXT = PipelineRobustnessBufferBehavior;
 pub type PipelineRobustnessImageBehaviorEXT = PipelineRobustnessImageBehavior;
+pub type DeviceFaultVendorBinaryHeaderVersionEXT = DeviceFaultVendorBinaryHeaderVersionKHR;
 pub type ScopeNV = ScopeKHR;
 pub type ComponentTypeNV = ComponentTypeKHR;
 pub type TessellationDomainOriginKHR = TessellationDomainOrigin;
@@ -1400,6 +1425,7 @@ pub type SamplerYcbcrRangeKHR = SamplerYcbcrRange;
 pub type ChromaLocationKHR = ChromaLocation;
 pub type SamplerReductionModeEXT = SamplerReductionMode;
 pub type ShaderFloatControlsIndependenceKHR = ShaderFloatControlsIndependence;
+pub type DeviceFaultAddressTypeEXT = DeviceFaultAddressTypeKHR;
 pub type DriverIdKHR = DriverId;
 pub type PFN_vkInternalAllocationNotification = Option<
     extern "system" fn(
@@ -6578,6 +6604,30 @@ impl Default for WaylandSurfaceCreateInfoKHR<'_> {
             next: ptr::null_mut(),
             flags: Default::default(),
             display: ptr::null_mut(),
+            surface: ptr::null_mut(),
+            _marker: PhantomData,
+        }
+    }
+}
+
+#[repr(C)]
+#[derive(Copy, Clone, Debug)]
+pub struct UbmSurfaceCreateInfoSEC<'a> {
+    pub s_type: StructureType,
+    /// Nullable
+    pub next: *const c_void,
+    pub flags: UbmSurfaceCreateFlagsSEC,
+    pub device: *mut ubm_device,
+    pub surface: *mut ubm_surface,
+    pub _marker: PhantomData<&'a ()>,
+}
+impl Default for UbmSurfaceCreateInfoSEC<'_> {
+    fn default() -> Self {
+        Self {
+            s_type: StructureType::UbmSurfaceCreateInfoSEC,
+            next: ptr::null_mut(),
+            flags: Default::default(),
+            device: ptr::null_mut(),
             surface: ptr::null_mut(),
             _marker: PhantomData,
         }
@@ -14487,6 +14537,30 @@ impl Default for PhysicalDeviceMaintenance9PropertiesKHR<'_> {
 
 impl ExtendsPhysicalDeviceProperties2 for PhysicalDeviceMaintenance9PropertiesKHR<'_> {}
 
+/// Extends: `PhysicalDeviceFeatures2`, `DeviceCreateInfo`
+#[repr(C)]
+#[derive(Copy, Clone, Debug)]
+pub struct PhysicalDeviceMaintenance11FeaturesKHR<'a> {
+    pub s_type: StructureType,
+    /// Nullable
+    pub next: *mut c_void,
+    pub maintenance11: Bool32,
+    pub _marker: PhantomData<&'a ()>,
+}
+impl Default for PhysicalDeviceMaintenance11FeaturesKHR<'_> {
+    fn default() -> Self {
+        Self {
+            s_type: StructureType::PhysicalDeviceMaintenance11FeaturesKHR,
+            next: ptr::null_mut(),
+            maintenance11: FALSE,
+            _marker: PhantomData,
+        }
+    }
+}
+
+impl ExtendsPhysicalDeviceFeatures2 for PhysicalDeviceMaintenance11FeaturesKHR<'_> {}
+impl ExtendsDeviceCreateInfo for PhysicalDeviceMaintenance11FeaturesKHR<'_> {}
+
 /// Extends: `PhysicalDeviceProperties2`
 /// returned_only
 #[repr(C)]
@@ -14562,6 +14636,30 @@ impl Default for QueueFamilyOwnershipTransferPropertiesKHR<'_> {
 }
 
 impl ExtendsQueueFamilyProperties2 for QueueFamilyOwnershipTransferPropertiesKHR<'_> {}
+
+/// Extends: `QueueFamilyProperties2`
+/// returned_only
+#[repr(C)]
+#[derive(Copy, Clone, Debug)]
+pub struct QueueFamilyOptimalImageTransferGranularityPropertiesKHR<'a> {
+    pub s_type: StructureType,
+    /// Nullable
+    pub next: *mut c_void,
+    pub optimal_image_transfer_granularity: Extent3D,
+    pub _marker: PhantomData<&'a ()>,
+}
+impl Default for QueueFamilyOptimalImageTransferGranularityPropertiesKHR<'_> {
+    fn default() -> Self {
+        Self {
+            s_type: StructureType::QueueFamilyOptimalImageTransferGranularityPropertiesKHR,
+            next: ptr::null_mut(),
+            optimal_image_transfer_granularity: Default::default(),
+            _marker: PhantomData,
+        }
+    }
+}
+
+impl ExtendsQueueFamilyProperties2 for QueueFamilyOptimalImageTransferGranularityPropertiesKHR<'_> {}
 
 #[repr(C)]
 #[derive(Copy, Clone, Debug)]
@@ -18157,7 +18255,7 @@ pub struct AccelerationStructureInfoNV<'a> {
     /// Nullable
     pub next: *const c_void,
     pub ty: AccelerationStructureTypeNV,
-    pub flags: BuildAccelerationStructureFlagsNV,
+    pub flags: BuildAccelerationStructureFlagsKHR,
     pub instance_count: u32,
     pub geometry_count: u32,
     /// Len: `geometry_count`
@@ -23187,7 +23285,7 @@ impl Default for RenderPassTransformBeginInfoQCOM<'_> {
 
 impl ExtendsRenderPassBeginInfo for RenderPassTransformBeginInfoQCOM<'_> {}
 
-/// Extends: `BufferImageCopy2`, `ImageBlit2`
+/// Extends: `BufferImageCopy2`, `ImageBlit2`, `DeviceMemoryImageCopyKHR`
 #[repr(C)]
 #[derive(Copy, Clone, Debug)]
 pub struct CopyCommandTransformInfoQCOM<'a> {
@@ -23210,6 +23308,7 @@ impl Default for CopyCommandTransformInfoQCOM<'_> {
 
 impl ExtendsBufferImageCopy2 for CopyCommandTransformInfoQCOM<'_> {}
 impl ExtendsImageBlit2 for CopyCommandTransformInfoQCOM<'_> {}
+impl ExtendsDeviceMemoryImageCopyKHR for CopyCommandTransformInfoQCOM<'_> {}
 
 /// Extends: `CommandBufferInheritanceInfo`
 #[repr(C)]
@@ -26053,7 +26152,7 @@ impl<'a> BufferMemoryBarrier2<'a> {
 }
 
 pub type BufferMemoryBarrier2KHR<'a> = BufferMemoryBarrier2<'a>;
-/// Extends: `SubpassDependency2`, `BufferMemoryBarrier2`, `ImageMemoryBarrier2`
+/// Extends: `SubpassDependency2`, `BufferMemoryBarrier2`, `ImageMemoryBarrier2`, `MemoryRangeBarriersInfoKHR`
 #[repr(C)]
 #[derive(Copy, Clone, Debug)]
 pub struct MemoryBarrierAccessFlags3KHR<'a> {
@@ -26079,6 +26178,7 @@ impl Default for MemoryBarrierAccessFlags3KHR<'_> {
 impl ExtendsSubpassDependency2 for MemoryBarrierAccessFlags3KHR<'_> {}
 impl ExtendsBufferMemoryBarrier2 for MemoryBarrierAccessFlags3KHR<'_> {}
 impl ExtendsImageMemoryBarrier2 for MemoryBarrierAccessFlags3KHR<'_> {}
+impl ExtendsMemoryRangeBarriersInfoKHR for MemoryBarrierAccessFlags3KHR<'_> {}
 
 #[repr(C)]
 #[derive(Copy, Clone, Debug)]
@@ -31509,7 +31609,7 @@ impl Default for AccelerationStructureCaptureDescriptorDataInfoEXT<'_> {
     }
 }
 
-/// Extends: `BufferCreateInfo`, `ImageCreateInfo`, `ImageViewCreateInfo`, `SamplerCreateInfo`, `AccelerationStructureCreateInfoKHR`, `AccelerationStructureCreateInfoNV`, `TensorCreateInfoARM`, `TensorViewCreateInfoARM`
+/// Extends: `BufferCreateInfo`, `ImageCreateInfo`, `ImageViewCreateInfo`, `SamplerCreateInfo`, `AccelerationStructureCreateInfoKHR`, `AccelerationStructureCreateInfoNV`, `TensorCreateInfoARM`, `TensorViewCreateInfoARM`, `AccelerationStructureCreateInfo2KHR`
 #[repr(C)]
 #[derive(Copy, Clone, Debug)]
 pub struct OpaqueCaptureDescriptorDataCreateInfoEXT<'a> {
@@ -31538,6 +31638,7 @@ impl ExtendsAccelerationStructureCreateInfoKHR for OpaqueCaptureDescriptorDataCr
 impl ExtendsAccelerationStructureCreateInfoNV for OpaqueCaptureDescriptorDataCreateInfoEXT<'_> {}
 impl ExtendsTensorCreateInfoARM for OpaqueCaptureDescriptorDataCreateInfoEXT<'_> {}
 impl ExtendsTensorViewCreateInfoARM for OpaqueCaptureDescriptorDataCreateInfoEXT<'_> {}
+impl ExtendsAccelerationStructureCreateInfo2KHR for OpaqueCaptureDescriptorDataCreateInfoEXT<'_> {}
 
 /// Extends: `PhysicalDeviceFeatures2`, `DeviceCreateInfo`
 #[repr(C)]
@@ -33204,6 +33305,82 @@ impl Default for GraphicsPipelineLibraryCreateInfoEXT<'_> {
 }
 
 impl ExtendsGraphicsPipelineCreateInfo for GraphicsPipelineLibraryCreateInfoEXT<'_> {}
+
+/// Extends: `PhysicalDeviceFeatures2`, `DeviceCreateInfo`
+#[repr(C)]
+#[derive(Copy, Clone, Debug)]
+pub struct PhysicalDeviceDataGraphNeuralAcceleratorStatisticsFeaturesARM<'a> {
+    pub s_type: StructureType,
+    /// Nullable
+    pub next: *mut c_void,
+    pub data_graph_neural_accelerator_statistics: Bool32,
+    pub _marker: PhantomData<&'a ()>,
+}
+impl Default for PhysicalDeviceDataGraphNeuralAcceleratorStatisticsFeaturesARM<'_> {
+    fn default() -> Self {
+        Self {
+            s_type: StructureType::PhysicalDeviceDataGraphNeuralAcceleratorStatisticsFeaturesARM,
+            next: ptr::null_mut(),
+            data_graph_neural_accelerator_statistics: FALSE,
+            _marker: PhantomData,
+        }
+    }
+}
+
+impl ExtendsPhysicalDeviceFeatures2
+    for PhysicalDeviceDataGraphNeuralAcceleratorStatisticsFeaturesARM<'_>
+{
+}
+impl ExtendsDeviceCreateInfo for PhysicalDeviceDataGraphNeuralAcceleratorStatisticsFeaturesARM<'_> {}
+
+/// Extends: `DataGraphPipelineCreateInfoARM`
+#[repr(C)]
+#[derive(Copy, Clone, Debug)]
+pub struct DataGraphPipelineNeuralStatisticsCreateInfoARM<'a> {
+    pub s_type: StructureType,
+    /// Nullable
+    pub next: *const c_void,
+    pub allow_neural_statistics: Bool32,
+    pub _marker: PhantomData<&'a ()>,
+}
+impl Default for DataGraphPipelineNeuralStatisticsCreateInfoARM<'_> {
+    fn default() -> Self {
+        Self {
+            s_type: StructureType::DataGraphPipelineNeuralStatisticsCreateInfoARM,
+            next: ptr::null_mut(),
+            allow_neural_statistics: FALSE,
+            _marker: PhantomData,
+        }
+    }
+}
+
+impl ExtendsDataGraphPipelineCreateInfoARM for DataGraphPipelineNeuralStatisticsCreateInfoARM<'_> {}
+
+/// Extends: `DataGraphPipelineSessionCreateInfoARM`
+#[repr(C)]
+#[derive(Copy, Clone, Debug)]
+pub struct DataGraphPipelineSessionNeuralStatisticsCreateInfoARM<'a> {
+    pub s_type: StructureType,
+    /// Nullable
+    pub next: *const c_void,
+    pub mode: NeuralAcceleratorStatisticsModeARM,
+    pub _marker: PhantomData<&'a ()>,
+}
+impl Default for DataGraphPipelineSessionNeuralStatisticsCreateInfoARM<'_> {
+    fn default() -> Self {
+        Self {
+            s_type: StructureType::DataGraphPipelineSessionNeuralStatisticsCreateInfoARM,
+            next: ptr::null_mut(),
+            mode: Default::default(),
+            _marker: PhantomData,
+        }
+    }
+}
+
+impl ExtendsDataGraphPipelineSessionCreateInfoARM
+    for DataGraphPipelineSessionNeuralStatisticsCreateInfoARM<'_>
+{
+}
 
 /// Extends: `PhysicalDeviceFeatures2`, `DeviceCreateInfo`
 #[repr(C)]
@@ -35306,14 +35483,15 @@ impl Default for PhysicalDeviceFaultFeaturesEXT<'_> {
 impl ExtendsPhysicalDeviceFeatures2 for PhysicalDeviceFaultFeaturesEXT<'_> {}
 impl ExtendsDeviceCreateInfo for PhysicalDeviceFaultFeaturesEXT<'_> {}
 
+/// returned_only
 #[repr(C)]
 #[derive(Copy, Clone, Debug)]
-pub struct DeviceFaultAddressInfoEXT {
-    pub address_type: DeviceFaultAddressTypeEXT,
+pub struct DeviceFaultAddressInfoKHR {
+    pub address_type: DeviceFaultAddressTypeKHR,
     pub reported_address: DeviceAddress,
     pub address_precision: DeviceSize,
 }
-impl Default for DeviceFaultAddressInfoEXT {
+impl Default for DeviceFaultAddressInfoKHR {
     fn default() -> Self {
         Self {
             address_type: Default::default(),
@@ -35323,22 +35501,106 @@ impl Default for DeviceFaultAddressInfoEXT {
     }
 }
 
+pub type DeviceFaultAddressInfoEXT = DeviceFaultAddressInfoKHR;
+/// returned_only
 #[repr(C)]
 #[derive(Copy, Clone, Debug)]
-pub struct DeviceFaultVendorInfoEXT {
+pub struct DeviceFaultVendorInfoKHR {
     /// Free-form description of the fault
     /// Len: null-terminated
     pub description: [c_char; MAX_DESCRIPTION_SIZE as usize],
     pub vendor_fault_code: u64,
     pub vendor_fault_data: u64,
 }
-impl Default for DeviceFaultVendorInfoEXT {
+impl Default for DeviceFaultVendorInfoKHR {
     fn default() -> Self {
         Self {
             description: unsafe { mem::zeroed() },
             vendor_fault_code: 0,
             vendor_fault_data: 0,
         }
+    }
+}
+
+pub type DeviceFaultVendorInfoEXT = DeviceFaultVendorInfoKHR;
+/// returned_only
+#[repr(C)]
+#[derive(Copy, Clone, Debug)]
+pub struct DeviceFaultInfoKHR<'a> {
+    pub s_type: StructureType,
+    /// Nullable
+    pub next: *mut c_void,
+    pub flags: DeviceFaultFlagsKHR,
+    pub group_id: u64,
+    /// Free-form description of the fault
+    /// Len: null-terminated
+    pub description: [c_char; MAX_DESCRIPTION_SIZE as usize],
+    pub fault_address_info: DeviceFaultAddressInfoKHR,
+    pub instruction_address_info: DeviceFaultAddressInfoKHR,
+    pub vendor_info: DeviceFaultVendorInfoKHR,
+    pub _marker: PhantomData<&'a ()>,
+}
+impl Default for DeviceFaultInfoKHR<'_> {
+    fn default() -> Self {
+        Self {
+            s_type: StructureType::DeviceFaultInfoKHR,
+            next: ptr::null_mut(),
+            flags: Default::default(),
+            group_id: 0,
+            description: unsafe { mem::zeroed() },
+            fault_address_info: Default::default(),
+            instruction_address_info: Default::default(),
+            vendor_info: Default::default(),
+            _marker: PhantomData,
+        }
+    }
+}
+
+/// returned_only
+#[repr(C)]
+#[derive(Copy, Clone, Debug)]
+pub struct DeviceFaultDebugInfoKHR<'a> {
+    pub s_type: StructureType,
+    /// Nullable
+    pub next: *mut c_void,
+    pub vendor_binary_size: u32,
+    /// Nullable
+    /// Len: `vendor_binary_size`
+    pub vendor_binary_data: *mut c_void,
+    pub _marker: PhantomData<&'a ()>,
+}
+impl Default for DeviceFaultDebugInfoKHR<'_> {
+    fn default() -> Self {
+        Self {
+            s_type: StructureType::DeviceFaultDebugInfoKHR,
+            next: ptr::null_mut(),
+            vendor_binary_size: 0,
+            vendor_binary_data: ptr::null_mut(),
+            _marker: PhantomData,
+        }
+    }
+}
+
+pub trait ExtendsDeviceFaultDebugInfoKHR {}
+impl<'a> DeviceFaultDebugInfoKHR<'a> {
+    /// Prepends the given extension struct between the root and the first pointer.
+    /// If the chain looks like `A -> B -> C`, and you call `x.next(&mut D)`,
+    /// then the chain will look like `A -> D -> B -> C`.
+    #[inline]
+    pub fn next<T: ExtendsDeviceFaultDebugInfoKHR>(mut self, next: &'a mut T) -> Self {
+        unsafe {
+            let next_base: *mut BaseOutStructure = ptr::from_mut(next).cast();
+
+            debug_assert!(
+                (*next_base).next.is_null(),
+                "next of inserted struct must be null (already in a chain?)"
+            );
+
+            (*next_base).next = self.next as _;
+            self.next = ptr::from_mut(next).cast();
+        }
+
+        self
     }
 }
 
@@ -35378,9 +35640,9 @@ pub struct DeviceFaultInfoEXT<'a> {
     /// Len: null-terminated
     pub description: [c_char; MAX_DESCRIPTION_SIZE as usize],
     /// Nullable
-    pub address_infos: *mut DeviceFaultAddressInfoEXT,
+    pub address_infos: *mut DeviceFaultAddressInfoKHR,
     /// Nullable
-    pub vendor_infos: *mut DeviceFaultVendorInfoEXT,
+    pub vendor_infos: *mut DeviceFaultVendorInfoKHR,
     /// Nullable
     pub vendor_binary_data: *mut c_void,
     pub _marker: PhantomData<&'a ()>,
@@ -35401,9 +35663,9 @@ impl Default for DeviceFaultInfoEXT<'_> {
 
 #[repr(C)]
 #[derive(Copy, Clone, Debug)]
-pub struct DeviceFaultVendorBinaryHeaderVersionOneEXT {
+pub struct DeviceFaultVendorBinaryHeaderVersionOneKHR {
     pub header_size: u32,
-    pub header_version: DeviceFaultVendorBinaryHeaderVersionEXT,
+    pub header_version: DeviceFaultVendorBinaryHeaderVersionKHR,
     pub vendor_id: u32,
     pub device_id: u32,
     pub driver_version: u32,
@@ -35414,7 +35676,7 @@ pub struct DeviceFaultVendorBinaryHeaderVersionOneEXT {
     pub engine_version: u32,
     pub api_version: u32,
 }
-impl Default for DeviceFaultVendorBinaryHeaderVersionOneEXT {
+impl Default for DeviceFaultVendorBinaryHeaderVersionOneKHR {
     fn default() -> Self {
         Self {
             header_size: 0,
@@ -35431,6 +35693,61 @@ impl Default for DeviceFaultVendorBinaryHeaderVersionOneEXT {
         }
     }
 }
+
+pub type DeviceFaultVendorBinaryHeaderVersionOneEXT = DeviceFaultVendorBinaryHeaderVersionOneKHR;
+/// Extends: `PhysicalDeviceFeatures2`, `DeviceCreateInfo`
+#[repr(C)]
+#[derive(Copy, Clone, Debug)]
+pub struct PhysicalDeviceFaultFeaturesKHR<'a> {
+    pub s_type: StructureType,
+    /// Nullable
+    pub next: *mut c_void,
+    pub device_fault: Bool32,
+    pub device_fault_vendor_binary: Bool32,
+    pub device_fault_report_masked: Bool32,
+    pub device_fault_device_lost_on_masked: Bool32,
+    pub _marker: PhantomData<&'a ()>,
+}
+impl Default for PhysicalDeviceFaultFeaturesKHR<'_> {
+    fn default() -> Self {
+        Self {
+            s_type: StructureType::PhysicalDeviceFaultFeaturesKHR,
+            next: ptr::null_mut(),
+            device_fault: FALSE,
+            device_fault_vendor_binary: FALSE,
+            device_fault_report_masked: FALSE,
+            device_fault_device_lost_on_masked: FALSE,
+            _marker: PhantomData,
+        }
+    }
+}
+
+impl ExtendsPhysicalDeviceFeatures2 for PhysicalDeviceFaultFeaturesKHR<'_> {}
+impl ExtendsDeviceCreateInfo for PhysicalDeviceFaultFeaturesKHR<'_> {}
+
+/// Extends: `PhysicalDeviceProperties2`
+/// returned_only
+#[repr(C)]
+#[derive(Copy, Clone, Debug)]
+pub struct PhysicalDeviceFaultPropertiesKHR<'a> {
+    pub s_type: StructureType,
+    /// Nullable
+    pub next: *mut c_void,
+    pub max_device_fault_count: u32,
+    pub _marker: PhantomData<&'a ()>,
+}
+impl Default for PhysicalDeviceFaultPropertiesKHR<'_> {
+    fn default() -> Self {
+        Self {
+            s_type: StructureType::PhysicalDeviceFaultPropertiesKHR,
+            next: ptr::null_mut(),
+            max_device_fault_count: 0,
+            _marker: PhantomData,
+        }
+    }
+}
+
+impl ExtendsPhysicalDeviceProperties2 for PhysicalDeviceFaultPropertiesKHR<'_> {}
 
 /// Extends: `PhysicalDeviceFeatures2`, `DeviceCreateInfo`
 #[repr(C)]
@@ -35538,7 +35855,7 @@ pub struct DecompressMemoryRegionNV {
     pub compressed_size: DeviceSize,
     /// Specified in bytes
     pub decompressed_size: DeviceSize,
-    pub decompression_method: MemoryDecompressionMethodFlagsNV,
+    pub decompression_method: MemoryDecompressionMethodFlagsEXT,
 }
 impl Default for DecompressMemoryRegionNV {
     fn default() -> Self {
@@ -36936,6 +37253,30 @@ impl Default for PhysicalDeviceCooperativeMatrixPropertiesKHR<'_> {
 }
 
 impl ExtendsPhysicalDeviceProperties2 for PhysicalDeviceCooperativeMatrixPropertiesKHR<'_> {}
+
+/// Extends: `PhysicalDeviceFeatures2`, `DeviceCreateInfo`
+#[repr(C)]
+#[derive(Copy, Clone, Debug)]
+pub struct PhysicalDeviceCooperativeMatrixConversionFeaturesQCOM<'a> {
+    pub s_type: StructureType,
+    /// Nullable
+    pub next: *mut c_void,
+    pub cooperative_matrix_conversion: Bool32,
+    pub _marker: PhantomData<&'a ()>,
+}
+impl Default for PhysicalDeviceCooperativeMatrixConversionFeaturesQCOM<'_> {
+    fn default() -> Self {
+        Self {
+            s_type: StructureType::PhysicalDeviceCooperativeMatrixConversionFeaturesQCOM,
+            next: ptr::null_mut(),
+            cooperative_matrix_conversion: FALSE,
+            _marker: PhantomData,
+        }
+    }
+}
+
+impl ExtendsPhysicalDeviceFeatures2 for PhysicalDeviceCooperativeMatrixConversionFeaturesQCOM<'_> {}
+impl ExtendsDeviceCreateInfo for PhysicalDeviceCooperativeMatrixConversionFeaturesQCOM<'_> {}
 
 /// Extends: `PhysicalDeviceProperties2`
 /// returned_only
@@ -38386,6 +38727,61 @@ impl Default for PhysicalDeviceSchedulingControlsPropertiesARM<'_> {
 }
 
 impl ExtendsPhysicalDeviceProperties2 for PhysicalDeviceSchedulingControlsPropertiesARM<'_> {}
+
+/// Extends: `PhysicalDeviceProperties2`
+/// returned_only
+#[repr(C)]
+#[derive(Copy, Clone, Debug)]
+pub struct PhysicalDeviceSchedulingControlsDispatchParametersPropertiesARM<'a> {
+    pub s_type: StructureType,
+    /// Nullable
+    pub next: *mut c_void,
+    pub scheduling_controls_max_warps_count: u32,
+    pub scheduling_controls_max_queued_batches_count: u32,
+    pub scheduling_controls_max_work_group_batch_size: u32,
+    pub _marker: PhantomData<&'a ()>,
+}
+impl Default for PhysicalDeviceSchedulingControlsDispatchParametersPropertiesARM<'_> {
+    fn default() -> Self {
+        Self {
+            s_type: StructureType::PhysicalDeviceSchedulingControlsDispatchParametersPropertiesARM,
+            next: ptr::null_mut(),
+            scheduling_controls_max_warps_count: 0,
+            scheduling_controls_max_queued_batches_count: 0,
+            scheduling_controls_max_work_group_batch_size: 0,
+            _marker: PhantomData,
+        }
+    }
+}
+
+impl ExtendsPhysicalDeviceProperties2
+    for PhysicalDeviceSchedulingControlsDispatchParametersPropertiesARM<'_>
+{
+}
+
+#[repr(C)]
+#[derive(Copy, Clone, Debug)]
+pub struct DispatchParametersARM<'a> {
+    pub s_type: StructureType,
+    /// Nullable
+    pub next: *mut c_void,
+    pub work_group_batch_size: u32,
+    pub max_queued_work_group_batches: u32,
+    pub max_warps_per_shader_core: u32,
+    pub _marker: PhantomData<&'a ()>,
+}
+impl Default for DispatchParametersARM<'_> {
+    fn default() -> Self {
+        Self {
+            s_type: StructureType::DispatchParametersARM,
+            next: ptr::null_mut(),
+            work_group_batch_size: 0,
+            max_queued_work_group_batches: 0,
+            max_warps_per_shader_core: 0,
+            _marker: PhantomData,
+        }
+    }
+}
 
 /// Extends: `PhysicalDeviceFeatures2`, `DeviceCreateInfo`
 #[repr(C)]
@@ -39903,6 +40299,60 @@ impl ExtendsDeviceCreateInfo for PhysicalDeviceShaderUniformBufferUnsizedArrayFe
 /// Extends: `PhysicalDeviceFeatures2`, `DeviceCreateInfo`
 #[repr(C)]
 #[derive(Copy, Clone, Debug)]
+pub struct PhysicalDeviceShaderMixedFloatDotProductFeaturesVALVE<'a> {
+    pub s_type: StructureType,
+    /// Nullable
+    pub next: *mut c_void,
+    pub shader_mixed_float_dot_product_float16_acc_float32: Bool32,
+    pub shader_mixed_float_dot_product_float16_acc_float16: Bool32,
+    pub shader_mixed_float_dot_product_b_float16_acc: Bool32,
+    pub shader_mixed_float_dot_product_float8_acc_float32: Bool32,
+    pub _marker: PhantomData<&'a ()>,
+}
+impl Default for PhysicalDeviceShaderMixedFloatDotProductFeaturesVALVE<'_> {
+    fn default() -> Self {
+        Self {
+            s_type: StructureType::PhysicalDeviceShaderMixedFloatDotProductFeaturesVALVE,
+            next: ptr::null_mut(),
+            shader_mixed_float_dot_product_float16_acc_float32: FALSE,
+            shader_mixed_float_dot_product_float16_acc_float16: FALSE,
+            shader_mixed_float_dot_product_b_float16_acc: FALSE,
+            shader_mixed_float_dot_product_float8_acc_float32: FALSE,
+            _marker: PhantomData,
+        }
+    }
+}
+
+impl ExtendsPhysicalDeviceFeatures2 for PhysicalDeviceShaderMixedFloatDotProductFeaturesVALVE<'_> {}
+impl ExtendsDeviceCreateInfo for PhysicalDeviceShaderMixedFloatDotProductFeaturesVALVE<'_> {}
+
+/// Extends: `PhysicalDeviceFeatures2`, `DeviceCreateInfo`
+#[repr(C)]
+#[derive(Copy, Clone, Debug)]
+pub struct PhysicalDevicePrimitiveRestartIndexFeaturesEXT<'a> {
+    pub s_type: StructureType,
+    /// Nullable
+    pub next: *mut c_void,
+    pub primitive_restart_index: Bool32,
+    pub _marker: PhantomData<&'a ()>,
+}
+impl Default for PhysicalDevicePrimitiveRestartIndexFeaturesEXT<'_> {
+    fn default() -> Self {
+        Self {
+            s_type: StructureType::PhysicalDevicePrimitiveRestartIndexFeaturesEXT,
+            next: ptr::null_mut(),
+            primitive_restart_index: FALSE,
+            _marker: PhantomData,
+        }
+    }
+}
+
+impl ExtendsPhysicalDeviceFeatures2 for PhysicalDevicePrimitiveRestartIndexFeaturesEXT<'_> {}
+impl ExtendsDeviceCreateInfo for PhysicalDevicePrimitiveRestartIndexFeaturesEXT<'_> {}
+
+/// Extends: `PhysicalDeviceFeatures2`, `DeviceCreateInfo`
+#[repr(C)]
+#[derive(Copy, Clone, Debug)]
 pub struct PhysicalDeviceFormatPackFeaturesARM<'a> {
     pub s_type: StructureType,
     /// Nullable
@@ -39923,6 +40373,53 @@ impl Default for PhysicalDeviceFormatPackFeaturesARM<'_> {
 
 impl ExtendsPhysicalDeviceFeatures2 for PhysicalDeviceFormatPackFeaturesARM<'_> {}
 impl ExtendsDeviceCreateInfo for PhysicalDeviceFormatPackFeaturesARM<'_> {}
+
+/// Extends: `PhysicalDeviceFeatures2`, `DeviceCreateInfo`
+#[repr(C)]
+#[derive(Copy, Clone, Debug)]
+pub struct PhysicalDeviceThrottleHintFeaturesSEC<'a> {
+    pub s_type: StructureType,
+    /// Nullable
+    pub next: *mut c_void,
+    pub throttle_hint: Bool32,
+    pub _marker: PhantomData<&'a ()>,
+}
+impl Default for PhysicalDeviceThrottleHintFeaturesSEC<'_> {
+    fn default() -> Self {
+        Self {
+            s_type: StructureType::PhysicalDeviceThrottleHintFeaturesSEC,
+            next: ptr::null_mut(),
+            throttle_hint: FALSE,
+            _marker: PhantomData,
+        }
+    }
+}
+
+impl ExtendsPhysicalDeviceFeatures2 for PhysicalDeviceThrottleHintFeaturesSEC<'_> {}
+impl ExtendsDeviceCreateInfo for PhysicalDeviceThrottleHintFeaturesSEC<'_> {}
+
+/// Extends: `SubmitInfo`
+#[repr(C)]
+#[derive(Copy, Clone, Debug)]
+pub struct ThrottleHintSubmitInfoSEC<'a> {
+    pub s_type: StructureType,
+    /// Nullable
+    pub next: *const c_void,
+    pub throttle_hint: ThrottleHintTypeSEC,
+    pub _marker: PhantomData<&'a ()>,
+}
+impl Default for ThrottleHintSubmitInfoSEC<'_> {
+    fn default() -> Self {
+        Self {
+            s_type: StructureType::ThrottleHintSubmitInfoSEC,
+            next: ptr::null_mut(),
+            throttle_hint: Default::default(),
+            _marker: PhantomData,
+        }
+    }
+}
+
+impl ExtendsSubmitInfo for ThrottleHintSubmitInfoSEC<'_> {}
 
 /// Extends: `DataGraphPipelineResourceInfoARM`, `DataGraphPipelineConstantARM`
 #[repr(C)]
@@ -40248,6 +40745,7 @@ pub struct TensorDependencyInfoARM<'a> {
     /// Nullable
     pub next: *const c_void,
     pub tensor_memory_barrier_count: u32,
+    /// Len: `tensor_memory_barrier_count`
     pub tensor_memory_barriers: *const TensorMemoryBarrierARM<'a>,
     pub _marker: PhantomData<&'a ()>,
 }
@@ -40814,6 +41312,29 @@ impl<'a> DataGraphPipelineResourceInfoARM<'a> {
     }
 }
 
+/// Extends: `DataGraphPipelineResourceInfoARM`
+#[repr(C)]
+#[derive(Copy, Clone, Debug)]
+pub struct DataGraphPipelineResourceInfoImageLayoutARM<'a> {
+    pub s_type: StructureType,
+    /// Nullable
+    pub next: *const c_void,
+    pub layout: ImageLayout,
+    pub _marker: PhantomData<&'a ()>,
+}
+impl Default for DataGraphPipelineResourceInfoImageLayoutARM<'_> {
+    fn default() -> Self {
+        Self {
+            s_type: StructureType::DataGraphPipelineResourceInfoImageLayoutARM,
+            next: ptr::null_mut(),
+            layout: Default::default(),
+            _marker: PhantomData,
+        }
+    }
+}
+
+impl ExtendsDataGraphPipelineResourceInfoARM for DataGraphPipelineResourceInfoImageLayoutARM<'_> {}
+
 /// Extends: `DataGraphPipelineCreateInfoARM`
 #[repr(C)]
 #[derive(Copy, Clone, Debug)]
@@ -40844,7 +41365,7 @@ pub struct DataGraphPipelineCreateInfoARM<'a> {
     pub s_type: StructureType,
     /// Nullable
     pub next: *const c_void,
-    pub flags: PipelineCreateFlags2KHR,
+    pub flags: PipelineCreateFlags2,
     pub layout: PipelineLayout,
     pub resource_info_count: u32,
     /// Len: `resource_info_count`
@@ -40942,6 +41463,32 @@ impl Default for DataGraphPipelineSessionCreateInfoARM<'_> {
             data_graph_pipeline: Default::default(),
             _marker: PhantomData,
         }
+    }
+}
+
+pub trait ExtendsDataGraphPipelineSessionCreateInfoARM {}
+impl<'a> DataGraphPipelineSessionCreateInfoARM<'a> {
+    /// Prepends the given extension struct between the root and the first pointer.
+    /// If the chain looks like `A -> B -> C`, and you call `x.next(&mut D)`,
+    /// then the chain will look like `A -> D -> B -> C`.
+    #[inline]
+    pub fn next<T: ExtendsDataGraphPipelineSessionCreateInfoARM>(
+        mut self,
+        next: &'a mut T,
+    ) -> Self {
+        unsafe {
+            let next_base: *mut BaseOutStructure = ptr::from_mut(next).cast();
+
+            debug_assert!(
+                (*next_base).next.is_null(),
+                "next of inserted struct must be null (already in a chain?)"
+            );
+
+            (*next_base).next = self.next as _;
+            self.next = ptr::from_mut(next).cast();
+        }
+
+        self
     }
 }
 
@@ -41133,6 +41680,29 @@ impl Default for DataGraphPipelineDispatchInfoARM<'_> {
             flags: Default::default(),
             _marker: PhantomData,
         }
+    }
+}
+
+pub trait ExtendsDataGraphPipelineDispatchInfoARM {}
+impl<'a> DataGraphPipelineDispatchInfoARM<'a> {
+    /// Prepends the given extension struct between the root and the first pointer.
+    /// If the chain looks like `A -> B -> C`, and you call `x.next(&mut D)`,
+    /// then the chain will look like `A -> D -> B -> C`.
+    #[inline]
+    pub fn next<T: ExtendsDataGraphPipelineDispatchInfoARM>(mut self, next: &'a mut T) -> Self {
+        unsafe {
+            let next_base: *mut BaseOutStructure = ptr::from_mut(next).cast();
+
+            debug_assert!(
+                (*next_base).next.is_null(),
+                "next of inserted struct must be null (already in a chain?)"
+            );
+
+            (*next_base).next = self.next as _;
+            self.next = ptr::from_mut(next).cast();
+        }
+
+        self
     }
 }
 
@@ -41668,6 +42238,77 @@ impl ExtendsAttachmentDescription2 for ExternalFormatOHOS<'_> {}
 impl ExtendsGraphicsPipelineCreateInfo for ExternalFormatOHOS<'_> {}
 impl ExtendsCommandBufferInheritanceInfo for ExternalFormatOHOS<'_> {}
 
+#[repr(C)]
+#[derive(Copy, Clone, Debug)]
+pub struct PerfHintInfoQCOM<'a> {
+    pub s_type: StructureType,
+    /// Pointer to next structure
+    /// Nullable
+    pub next: *mut c_void,
+    pub ty: PerfHintTypeQCOM,
+    pub scale: u32,
+    pub _marker: PhantomData<&'a ()>,
+}
+impl Default for PerfHintInfoQCOM<'_> {
+    fn default() -> Self {
+        Self {
+            s_type: StructureType::PerfHintInfoQCOM,
+            next: ptr::null_mut(),
+            ty: Default::default(),
+            scale: 0,
+            _marker: PhantomData,
+        }
+    }
+}
+
+/// Extends: `PhysicalDeviceFeatures2`, `DeviceCreateInfo`
+#[repr(C)]
+#[derive(Copy, Clone, Debug)]
+pub struct PhysicalDeviceQueuePerfHintFeaturesQCOM<'a> {
+    pub s_type: StructureType,
+    /// Nullable
+    pub next: *mut c_void,
+    pub queue_perf_hint: Bool32,
+    pub _marker: PhantomData<&'a ()>,
+}
+impl Default for PhysicalDeviceQueuePerfHintFeaturesQCOM<'_> {
+    fn default() -> Self {
+        Self {
+            s_type: StructureType::PhysicalDeviceQueuePerfHintFeaturesQCOM,
+            next: ptr::null_mut(),
+            queue_perf_hint: FALSE,
+            _marker: PhantomData,
+        }
+    }
+}
+
+impl ExtendsPhysicalDeviceFeatures2 for PhysicalDeviceQueuePerfHintFeaturesQCOM<'_> {}
+impl ExtendsDeviceCreateInfo for PhysicalDeviceQueuePerfHintFeaturesQCOM<'_> {}
+
+/// Extends: `PhysicalDeviceProperties2`
+/// returned_only
+#[repr(C)]
+#[derive(Copy, Clone, Debug)]
+pub struct PhysicalDeviceQueuePerfHintPropertiesQCOM<'a> {
+    pub s_type: StructureType,
+    /// Nullable
+    pub next: *mut c_void,
+    pub supported_queues: QueueFlags,
+    pub _marker: PhantomData<&'a ()>,
+}
+impl Default for PhysicalDeviceQueuePerfHintPropertiesQCOM<'_> {
+    fn default() -> Self {
+        Self {
+            s_type: StructureType::PhysicalDeviceQueuePerfHintPropertiesQCOM,
+            next: ptr::null_mut(),
+            supported_queues: Default::default(),
+            _marker: PhantomData,
+        }
+    }
+}
+
+impl ExtendsPhysicalDeviceProperties2 for PhysicalDeviceQueuePerfHintPropertiesQCOM<'_> {}
+
 /// Extends: `PhysicalDeviceFeatures2`, `DeviceCreateInfo`
 #[repr(C)]
 #[derive(Copy, Clone, Debug)]
@@ -41781,9 +42422,11 @@ pub struct RenderPassPerformanceCountersByRegionBeginInfoARM<'a> {
     /// Nullable
     pub next: *mut c_void,
     pub counter_address_count: u32,
+    /// Len: `counter_address_count`
     pub counter_addresses: *const DeviceAddress,
     pub serialize_regions: Bool32,
     pub counter_index_count: u32,
+    /// Len: `counter_index_count`
     pub counter_indices: *mut u32,
     pub _marker: PhantomData<&'a ()>,
 }
@@ -41979,21 +42622,6 @@ impl Default for HostAddressRangeConstEXT<'_> {
             address: ptr::null_mut(),
             size: 0,
             _marker: PhantomData,
-        }
-    }
-}
-
-#[repr(C)]
-#[derive(Copy, Clone, Debug)]
-pub struct DeviceAddressRangeEXT {
-    pub address: DeviceAddress,
-    pub size: DeviceSize,
-}
-impl Default for DeviceAddressRangeEXT {
-    fn default() -> Self {
-        Self {
-            address: Default::default(),
-            size: Default::default(),
         }
     }
 }
@@ -42717,3 +43345,977 @@ impl Default for PhysicalDeviceDescriptorHeapTensorPropertiesARM<'_> {
 }
 
 impl ExtendsPhysicalDeviceProperties2 for PhysicalDeviceDescriptorHeapTensorPropertiesARM<'_> {}
+
+/// Extends: `PhysicalDeviceFeatures2`, `DeviceCreateInfo`
+#[repr(C)]
+#[derive(Copy, Clone, Debug)]
+pub struct PhysicalDeviceShaderInstrumentationFeaturesARM<'a> {
+    pub s_type: StructureType,
+    /// Nullable
+    pub next: *mut c_void,
+    pub shader_instrumentation: Bool32,
+    pub _marker: PhantomData<&'a ()>,
+}
+impl Default for PhysicalDeviceShaderInstrumentationFeaturesARM<'_> {
+    fn default() -> Self {
+        Self {
+            s_type: StructureType::PhysicalDeviceShaderInstrumentationFeaturesARM,
+            next: ptr::null_mut(),
+            shader_instrumentation: FALSE,
+            _marker: PhantomData,
+        }
+    }
+}
+
+impl ExtendsPhysicalDeviceFeatures2 for PhysicalDeviceShaderInstrumentationFeaturesARM<'_> {}
+impl ExtendsDeviceCreateInfo for PhysicalDeviceShaderInstrumentationFeaturesARM<'_> {}
+
+/// Extends: `PhysicalDeviceProperties2`
+/// returned_only
+#[repr(C)]
+#[derive(Copy, Clone, Debug)]
+pub struct PhysicalDeviceShaderInstrumentationPropertiesARM<'a> {
+    pub s_type: StructureType,
+    /// Nullable
+    pub next: *mut c_void,
+    pub num_metrics: u32,
+    pub per_basic_block_granularity: Bool32,
+    pub _marker: PhantomData<&'a ()>,
+}
+impl Default for PhysicalDeviceShaderInstrumentationPropertiesARM<'_> {
+    fn default() -> Self {
+        Self {
+            s_type: StructureType::PhysicalDeviceShaderInstrumentationPropertiesARM,
+            next: ptr::null_mut(),
+            num_metrics: 0,
+            per_basic_block_granularity: FALSE,
+            _marker: PhantomData,
+        }
+    }
+}
+
+impl ExtendsPhysicalDeviceProperties2 for PhysicalDeviceShaderInstrumentationPropertiesARM<'_> {}
+
+#[repr(C)]
+#[derive(Copy, Clone, Debug)]
+pub struct ShaderInstrumentationCreateInfoARM<'a> {
+    pub s_type: StructureType,
+    /// Nullable
+    pub next: *mut c_void,
+    pub _marker: PhantomData<&'a ()>,
+}
+impl Default for ShaderInstrumentationCreateInfoARM<'_> {
+    fn default() -> Self {
+        Self {
+            s_type: StructureType::ShaderInstrumentationCreateInfoARM,
+            next: ptr::null_mut(),
+            _marker: PhantomData,
+        }
+    }
+}
+
+#[repr(C)]
+#[derive(Copy, Clone, Debug)]
+pub struct ShaderInstrumentationMetricDescriptionARM<'a> {
+    pub s_type: StructureType,
+    /// Nullable
+    pub next: *mut c_void,
+    /// Len: null-terminated
+    pub name: [c_char; MAX_DESCRIPTION_SIZE as usize],
+    /// Len: null-terminated
+    pub description: [c_char; MAX_DESCRIPTION_SIZE as usize],
+    pub _marker: PhantomData<&'a ()>,
+}
+impl Default for ShaderInstrumentationMetricDescriptionARM<'_> {
+    fn default() -> Self {
+        Self {
+            s_type: StructureType::ShaderInstrumentationMetricDescriptionARM,
+            next: ptr::null_mut(),
+            name: unsafe { mem::zeroed() },
+            description: unsafe { mem::zeroed() },
+            _marker: PhantomData,
+        }
+    }
+}
+
+#[repr(C)]
+#[derive(Copy, Clone, Debug)]
+pub struct ShaderInstrumentationMetricDataHeaderARM {
+    pub result_index: u32,
+    pub result_sub_index: u32,
+    pub stages: ShaderStageFlags,
+    pub basic_block_index: u32,
+}
+impl Default for ShaderInstrumentationMetricDataHeaderARM {
+    fn default() -> Self {
+        Self {
+            result_index: 0,
+            result_sub_index: 0,
+            stages: Default::default(),
+            basic_block_index: 0,
+        }
+    }
+}
+
+#[repr(C)]
+#[derive(Copy, Clone, Debug)]
+pub struct DeviceAddressRangeKHR {
+    pub address: DeviceAddress,
+    pub size: DeviceSize,
+}
+impl Default for DeviceAddressRangeKHR {
+    fn default() -> Self {
+        Self {
+            address: Default::default(),
+            size: Default::default(),
+        }
+    }
+}
+
+pub type DeviceAddressRangeEXT = DeviceAddressRangeKHR;
+#[repr(C)]
+#[derive(Copy, Clone, Debug)]
+pub struct DeviceMemoryCopyKHR<'a> {
+    pub s_type: StructureType,
+    /// Nullable
+    pub next: *const c_void,
+    pub src_range: DeviceAddressRangeKHR,
+    pub src_flags: AddressCommandFlagsKHR,
+    pub dst_range: DeviceAddressRangeKHR,
+    pub dst_flags: AddressCommandFlagsKHR,
+    pub _marker: PhantomData<&'a ()>,
+}
+impl Default for DeviceMemoryCopyKHR<'_> {
+    fn default() -> Self {
+        Self {
+            s_type: StructureType::DeviceMemoryCopyKHR,
+            next: ptr::null_mut(),
+            src_range: Default::default(),
+            src_flags: Default::default(),
+            dst_range: Default::default(),
+            dst_flags: Default::default(),
+            _marker: PhantomData,
+        }
+    }
+}
+
+#[repr(C)]
+#[derive(Copy, Clone, Debug)]
+pub struct CopyDeviceMemoryInfoKHR<'a> {
+    pub s_type: StructureType,
+    /// Nullable
+    pub next: *const c_void,
+    pub region_count: u32,
+    /// Len: `region_count`
+    pub regions: *const DeviceMemoryCopyKHR<'a>,
+    pub _marker: PhantomData<&'a ()>,
+}
+impl Default for CopyDeviceMemoryInfoKHR<'_> {
+    fn default() -> Self {
+        Self {
+            s_type: StructureType::CopyDeviceMemoryInfoKHR,
+            next: ptr::null_mut(),
+            region_count: 0,
+            regions: ptr::null_mut(),
+            _marker: PhantomData,
+        }
+    }
+}
+
+#[repr(C)]
+#[derive(Copy, Clone, Debug)]
+pub struct DeviceMemoryImageCopyKHR<'a> {
+    pub s_type: StructureType,
+    /// Nullable
+    pub next: *const c_void,
+    pub address_range: DeviceAddressRangeKHR,
+    pub address_flags: AddressCommandFlagsKHR,
+    pub address_row_length: u32,
+    pub address_image_height: u32,
+    pub image_subresource: ImageSubresourceLayers,
+    pub image_layout: ImageLayout,
+    pub image_offset: Offset3D,
+    pub image_extent: Extent3D,
+    pub _marker: PhantomData<&'a ()>,
+}
+impl Default for DeviceMemoryImageCopyKHR<'_> {
+    fn default() -> Self {
+        Self {
+            s_type: StructureType::DeviceMemoryImageCopyKHR,
+            next: ptr::null_mut(),
+            address_range: Default::default(),
+            address_flags: Default::default(),
+            address_row_length: 0,
+            address_image_height: 0,
+            image_subresource: Default::default(),
+            image_layout: Default::default(),
+            image_offset: Default::default(),
+            image_extent: Default::default(),
+            _marker: PhantomData,
+        }
+    }
+}
+
+pub trait ExtendsDeviceMemoryImageCopyKHR {}
+impl<'a> DeviceMemoryImageCopyKHR<'a> {
+    /// Prepends the given extension struct between the root and the first pointer.
+    /// If the chain looks like `A -> B -> C`, and you call `x.next(&mut D)`,
+    /// then the chain will look like `A -> D -> B -> C`.
+    #[inline]
+    pub fn next<T: ExtendsDeviceMemoryImageCopyKHR>(mut self, next: &'a mut T) -> Self {
+        unsafe {
+            let next_base: *mut BaseOutStructure = ptr::from_mut(next).cast();
+
+            debug_assert!(
+                (*next_base).next.is_null(),
+                "next of inserted struct must be null (already in a chain?)"
+            );
+
+            (*next_base).next = self.next as _;
+            self.next = ptr::from_mut(next).cast();
+        }
+
+        self
+    }
+}
+
+#[repr(C)]
+#[derive(Copy, Clone, Debug)]
+pub struct CopyDeviceMemoryImageInfoKHR<'a> {
+    pub s_type: StructureType,
+    /// Nullable
+    pub next: *const c_void,
+    pub image: Image,
+    pub region_count: u32,
+    /// Len: `region_count`
+    pub regions: *const DeviceMemoryImageCopyKHR<'a>,
+    pub _marker: PhantomData<&'a ()>,
+}
+impl Default for CopyDeviceMemoryImageInfoKHR<'_> {
+    fn default() -> Self {
+        Self {
+            s_type: StructureType::CopyDeviceMemoryImageInfoKHR,
+            next: ptr::null_mut(),
+            image: Default::default(),
+            region_count: 0,
+            regions: ptr::null_mut(),
+            _marker: PhantomData,
+        }
+    }
+}
+
+/// Extends: `DependencyInfo`
+#[repr(C)]
+#[derive(Copy, Clone, Debug)]
+pub struct MemoryRangeBarriersInfoKHR<'a> {
+    pub s_type: StructureType,
+    /// Nullable
+    pub next: *const c_void,
+    pub memory_range_barrier_count: u32,
+    /// Len: `memory_range_barrier_count`
+    pub memory_range_barriers: *const MemoryRangeBarrierKHR<'a>,
+    pub _marker: PhantomData<&'a ()>,
+}
+impl Default for MemoryRangeBarriersInfoKHR<'_> {
+    fn default() -> Self {
+        Self {
+            s_type: StructureType::MemoryRangeBarriersInfoKHR,
+            next: ptr::null_mut(),
+            memory_range_barrier_count: 0,
+            memory_range_barriers: ptr::null_mut(),
+            _marker: PhantomData,
+        }
+    }
+}
+
+impl ExtendsDependencyInfo for MemoryRangeBarriersInfoKHR<'_> {}
+pub trait ExtendsMemoryRangeBarriersInfoKHR {}
+impl<'a> MemoryRangeBarriersInfoKHR<'a> {
+    /// Prepends the given extension struct between the root and the first pointer.
+    /// If the chain looks like `A -> B -> C`, and you call `x.next(&mut D)`,
+    /// then the chain will look like `A -> D -> B -> C`.
+    #[inline]
+    pub fn next<T: ExtendsMemoryRangeBarriersInfoKHR>(mut self, next: &'a mut T) -> Self {
+        unsafe {
+            let next_base: *mut BaseOutStructure = ptr::from_mut(next).cast();
+
+            debug_assert!(
+                (*next_base).next.is_null(),
+                "next of inserted struct must be null (already in a chain?)"
+            );
+
+            (*next_base).next = self.next as _;
+            self.next = ptr::from_mut(next).cast();
+        }
+
+        self
+    }
+}
+
+#[repr(C)]
+#[derive(Copy, Clone, Debug)]
+pub struct MemoryRangeBarrierKHR<'a> {
+    pub s_type: StructureType,
+    /// Nullable
+    pub next: *const c_void,
+    pub src_stage_mask: PipelineStageFlags2,
+    pub src_access_mask: AccessFlags2,
+    pub dst_stage_mask: PipelineStageFlags2,
+    pub dst_access_mask: AccessFlags2,
+    pub src_queue_family_index: u32,
+    pub dst_queue_family_index: u32,
+    pub address_range: DeviceAddressRangeKHR,
+    pub address_flags: AddressCommandFlagsKHR,
+    pub _marker: PhantomData<&'a ()>,
+}
+impl Default for MemoryRangeBarrierKHR<'_> {
+    fn default() -> Self {
+        Self {
+            s_type: StructureType::MemoryRangeBarrierKHR,
+            next: ptr::null_mut(),
+            src_stage_mask: Default::default(),
+            src_access_mask: Default::default(),
+            dst_stage_mask: Default::default(),
+            dst_access_mask: Default::default(),
+            src_queue_family_index: 0,
+            dst_queue_family_index: 0,
+            address_range: Default::default(),
+            address_flags: Default::default(),
+            _marker: PhantomData,
+        }
+    }
+}
+
+/// Extends: `PhysicalDeviceFeatures2`, `DeviceCreateInfo`
+#[repr(C)]
+#[derive(Copy, Clone, Debug)]
+pub struct PhysicalDeviceDeviceAddressCommandsFeaturesKHR<'a> {
+    pub s_type: StructureType,
+    /// Nullable
+    pub next: *mut c_void,
+    pub device_address_commands: Bool32,
+    pub _marker: PhantomData<&'a ()>,
+}
+impl Default for PhysicalDeviceDeviceAddressCommandsFeaturesKHR<'_> {
+    fn default() -> Self {
+        Self {
+            s_type: StructureType::PhysicalDeviceDeviceAddressCommandsFeaturesKHR,
+            next: ptr::null_mut(),
+            device_address_commands: FALSE,
+            _marker: PhantomData,
+        }
+    }
+}
+
+impl ExtendsPhysicalDeviceFeatures2 for PhysicalDeviceDeviceAddressCommandsFeaturesKHR<'_> {}
+impl ExtendsDeviceCreateInfo for PhysicalDeviceDeviceAddressCommandsFeaturesKHR<'_> {}
+
+#[repr(C)]
+#[derive(Copy, Clone, Debug)]
+pub struct ConditionalRenderingBeginInfo2EXT<'a> {
+    pub s_type: StructureType,
+    /// Nullable
+    pub next: *const c_void,
+    pub address_range: DeviceAddressRangeKHR,
+    pub address_flags: AddressCommandFlagsKHR,
+    pub flags: ConditionalRenderingFlagsEXT,
+    pub _marker: PhantomData<&'a ()>,
+}
+impl Default for ConditionalRenderingBeginInfo2EXT<'_> {
+    fn default() -> Self {
+        Self {
+            s_type: StructureType::ConditionalRenderingBeginInfo2EXT,
+            next: ptr::null_mut(),
+            address_range: Default::default(),
+            address_flags: Default::default(),
+            flags: Default::default(),
+            _marker: PhantomData,
+        }
+    }
+}
+
+#[repr(C)]
+#[derive(Copy, Clone, Debug)]
+pub struct AccelerationStructureCreateInfo2KHR<'a> {
+    pub s_type: StructureType,
+    /// Nullable
+    pub next: *const c_void,
+    pub create_flags: AccelerationStructureCreateFlagsKHR,
+    pub address_range: DeviceAddressRangeKHR,
+    pub address_flags: AddressCommandFlagsKHR,
+    pub ty: AccelerationStructureTypeKHR,
+    pub _marker: PhantomData<&'a ()>,
+}
+impl Default for AccelerationStructureCreateInfo2KHR<'_> {
+    fn default() -> Self {
+        Self {
+            s_type: StructureType::AccelerationStructureCreateInfo2KHR,
+            next: ptr::null_mut(),
+            create_flags: Default::default(),
+            address_range: Default::default(),
+            address_flags: Default::default(),
+            ty: Default::default(),
+            _marker: PhantomData,
+        }
+    }
+}
+
+pub trait ExtendsAccelerationStructureCreateInfo2KHR {}
+impl<'a> AccelerationStructureCreateInfo2KHR<'a> {
+    /// Prepends the given extension struct between the root and the first pointer.
+    /// If the chain looks like `A -> B -> C`, and you call `x.next(&mut D)`,
+    /// then the chain will look like `A -> D -> B -> C`.
+    #[inline]
+    pub fn next<T: ExtendsAccelerationStructureCreateInfo2KHR>(mut self, next: &'a mut T) -> Self {
+        unsafe {
+            let next_base: *mut BaseOutStructure = ptr::from_mut(next).cast();
+
+            debug_assert!(
+                (*next_base).next.is_null(),
+                "next of inserted struct must be null (already in a chain?)"
+            );
+
+            (*next_base).next = self.next as _;
+            self.next = ptr::from_mut(next).cast();
+        }
+
+        self
+    }
+}
+
+#[repr(C)]
+#[derive(Copy, Clone, Debug)]
+pub struct BindIndexBuffer3InfoKHR<'a> {
+    pub s_type: StructureType,
+    /// Nullable
+    pub next: *const c_void,
+    pub address_range: DeviceAddressRangeKHR,
+    pub address_flags: AddressCommandFlagsKHR,
+    pub index_type: IndexType,
+    pub _marker: PhantomData<&'a ()>,
+}
+impl Default for BindIndexBuffer3InfoKHR<'_> {
+    fn default() -> Self {
+        Self {
+            s_type: StructureType::BindIndexBuffer3InfoKHR,
+            next: ptr::null_mut(),
+            address_range: Default::default(),
+            address_flags: Default::default(),
+            index_type: Default::default(),
+            _marker: PhantomData,
+        }
+    }
+}
+
+#[repr(C)]
+#[derive(Copy, Clone, Debug)]
+pub struct BindVertexBuffer3InfoKHR<'a> {
+    pub s_type: StructureType,
+    /// Nullable
+    pub next: *const c_void,
+    pub set_stride: Bool32,
+    pub address_range: StridedDeviceAddressRangeKHR,
+    pub address_flags: AddressCommandFlagsKHR,
+    pub _marker: PhantomData<&'a ()>,
+}
+impl Default for BindVertexBuffer3InfoKHR<'_> {
+    fn default() -> Self {
+        Self {
+            s_type: StructureType::BindVertexBuffer3InfoKHR,
+            next: ptr::null_mut(),
+            set_stride: FALSE,
+            address_range: Default::default(),
+            address_flags: Default::default(),
+            _marker: PhantomData,
+        }
+    }
+}
+
+#[repr(C)]
+#[derive(Copy, Clone, Debug)]
+pub struct DrawIndirect2InfoKHR<'a> {
+    pub s_type: StructureType,
+    /// Nullable
+    pub next: *const c_void,
+    pub address_range: StridedDeviceAddressRangeKHR,
+    pub address_flags: AddressCommandFlagsKHR,
+    pub draw_count: u32,
+    pub _marker: PhantomData<&'a ()>,
+}
+impl Default for DrawIndirect2InfoKHR<'_> {
+    fn default() -> Self {
+        Self {
+            s_type: StructureType::DrawIndirect2InfoKHR,
+            next: ptr::null_mut(),
+            address_range: Default::default(),
+            address_flags: Default::default(),
+            draw_count: 0,
+            _marker: PhantomData,
+        }
+    }
+}
+
+#[repr(C)]
+#[derive(Copy, Clone, Debug)]
+pub struct DrawIndirectCount2InfoKHR<'a> {
+    pub s_type: StructureType,
+    /// Nullable
+    pub next: *const c_void,
+    pub address_range: StridedDeviceAddressRangeKHR,
+    pub address_flags: AddressCommandFlagsKHR,
+    pub count_address_range: DeviceAddressRangeKHR,
+    pub count_address_flags: AddressCommandFlagsKHR,
+    pub max_draw_count: u32,
+    pub _marker: PhantomData<&'a ()>,
+}
+impl Default for DrawIndirectCount2InfoKHR<'_> {
+    fn default() -> Self {
+        Self {
+            s_type: StructureType::DrawIndirectCount2InfoKHR,
+            next: ptr::null_mut(),
+            address_range: Default::default(),
+            address_flags: Default::default(),
+            count_address_range: Default::default(),
+            count_address_flags: Default::default(),
+            max_draw_count: 0,
+            _marker: PhantomData,
+        }
+    }
+}
+
+#[repr(C)]
+#[derive(Copy, Clone, Debug)]
+pub struct DispatchIndirect2InfoKHR<'a> {
+    pub s_type: StructureType,
+    /// Nullable
+    pub next: *const c_void,
+    pub address_range: DeviceAddressRangeKHR,
+    pub address_flags: AddressCommandFlagsKHR,
+    pub _marker: PhantomData<&'a ()>,
+}
+impl Default for DispatchIndirect2InfoKHR<'_> {
+    fn default() -> Self {
+        Self {
+            s_type: StructureType::DispatchIndirect2InfoKHR,
+            next: ptr::null_mut(),
+            address_range: Default::default(),
+            address_flags: Default::default(),
+            _marker: PhantomData,
+        }
+    }
+}
+
+#[repr(C)]
+#[derive(Copy, Clone, Debug)]
+pub struct BindTransformFeedbackBuffer2InfoEXT<'a> {
+    pub s_type: StructureType,
+    /// Nullable
+    pub next: *const c_void,
+    pub address_range: DeviceAddressRangeKHR,
+    pub address_flags: AddressCommandFlagsKHR,
+    pub _marker: PhantomData<&'a ()>,
+}
+impl Default for BindTransformFeedbackBuffer2InfoEXT<'_> {
+    fn default() -> Self {
+        Self {
+            s_type: StructureType::BindTransformFeedbackBuffer2InfoEXT,
+            next: ptr::null_mut(),
+            address_range: Default::default(),
+            address_flags: Default::default(),
+            _marker: PhantomData,
+        }
+    }
+}
+
+#[repr(C)]
+#[derive(Copy, Clone, Debug)]
+pub struct MemoryMarkerInfoAMD<'a> {
+    pub s_type: StructureType,
+    /// Nullable
+    pub next: *const c_void,
+    pub stage: PipelineStageFlags2KHR,
+    pub dst_range: DeviceAddressRangeKHR,
+    pub dst_flags: AddressCommandFlagsKHR,
+    pub marker: u32,
+    pub _marker: PhantomData<&'a ()>,
+}
+impl Default for MemoryMarkerInfoAMD<'_> {
+    fn default() -> Self {
+        Self {
+            s_type: StructureType::MemoryMarkerInfoAMD,
+            next: ptr::null_mut(),
+            stage: Default::default(),
+            dst_range: Default::default(),
+            dst_flags: Default::default(),
+            marker: 0,
+            _marker: PhantomData,
+        }
+    }
+}
+
+/// Extends: `PhysicalDeviceFeatures2`, `DeviceCreateInfo`
+#[repr(C)]
+#[derive(Copy, Clone, Debug)]
+pub struct PhysicalDeviceShaderConstantDataFeaturesKHR<'a> {
+    pub s_type: StructureType,
+    /// Nullable
+    pub next: *mut c_void,
+    pub shader_constant_data: Bool32,
+    pub _marker: PhantomData<&'a ()>,
+}
+impl Default for PhysicalDeviceShaderConstantDataFeaturesKHR<'_> {
+    fn default() -> Self {
+        Self {
+            s_type: StructureType::PhysicalDeviceShaderConstantDataFeaturesKHR,
+            next: ptr::null_mut(),
+            shader_constant_data: FALSE,
+            _marker: PhantomData,
+        }
+    }
+}
+
+impl ExtendsPhysicalDeviceFeatures2 for PhysicalDeviceShaderConstantDataFeaturesKHR<'_> {}
+impl ExtendsDeviceCreateInfo for PhysicalDeviceShaderConstantDataFeaturesKHR<'_> {}
+
+/// Extends: `PhysicalDeviceFeatures2`, `DeviceCreateInfo`
+#[repr(C)]
+#[derive(Copy, Clone, Debug)]
+pub struct PhysicalDeviceShaderAbortFeaturesKHR<'a> {
+    pub s_type: StructureType,
+    /// Nullable
+    pub next: *mut c_void,
+    pub shader_abort: Bool32,
+    pub _marker: PhantomData<&'a ()>,
+}
+impl Default for PhysicalDeviceShaderAbortFeaturesKHR<'_> {
+    fn default() -> Self {
+        Self {
+            s_type: StructureType::PhysicalDeviceShaderAbortFeaturesKHR,
+            next: ptr::null_mut(),
+            shader_abort: FALSE,
+            _marker: PhantomData,
+        }
+    }
+}
+
+impl ExtendsPhysicalDeviceFeatures2 for PhysicalDeviceShaderAbortFeaturesKHR<'_> {}
+impl ExtendsDeviceCreateInfo for PhysicalDeviceShaderAbortFeaturesKHR<'_> {}
+
+/// Extends: `PhysicalDeviceProperties2`
+#[repr(C)]
+#[derive(Copy, Clone, Debug)]
+pub struct PhysicalDeviceShaderAbortPropertiesKHR<'a> {
+    pub s_type: StructureType,
+    /// Nullable
+    pub next: *mut c_void,
+    pub max_shader_abort_message_size: u64,
+    pub _marker: PhantomData<&'a ()>,
+}
+impl Default for PhysicalDeviceShaderAbortPropertiesKHR<'_> {
+    fn default() -> Self {
+        Self {
+            s_type: StructureType::PhysicalDeviceShaderAbortPropertiesKHR,
+            next: ptr::null_mut(),
+            max_shader_abort_message_size: 0,
+            _marker: PhantomData,
+        }
+    }
+}
+
+impl ExtendsPhysicalDeviceProperties2 for PhysicalDeviceShaderAbortPropertiesKHR<'_> {}
+
+/// Extends: `DeviceFaultDebugInfoKHR`
+/// returned_only
+#[repr(C)]
+#[derive(Copy, Clone, Debug)]
+pub struct DeviceFaultShaderAbortMessageInfoKHR<'a> {
+    pub s_type: StructureType,
+    /// Nullable
+    pub next: *mut c_void,
+    pub message_data_size: u64,
+    /// Nullable
+    /// Len: `message_data_size`
+    pub message_data: *mut c_void,
+    pub _marker: PhantomData<&'a ()>,
+}
+impl Default for DeviceFaultShaderAbortMessageInfoKHR<'_> {
+    fn default() -> Self {
+        Self {
+            s_type: StructureType::DeviceFaultShaderAbortMessageInfoKHR,
+            next: ptr::null_mut(),
+            message_data_size: 0,
+            message_data: ptr::null_mut(),
+            _marker: PhantomData,
+        }
+    }
+}
+
+impl ExtendsDeviceFaultDebugInfoKHR for DeviceFaultShaderAbortMessageInfoKHR<'_> {}
+
+/// returned_only
+#[repr(C)]
+#[derive(Copy, Clone, Debug)]
+pub struct DataGraphTOSANameQualityARM {
+    /// Len: null-terminated
+    pub name: [c_char; MAX_DATA_GRAPH_TOSA_NAME_SIZE_ARM as usize],
+    pub quality_flags: DataGraphTOSAQualityFlagsARM,
+}
+impl Default for DataGraphTOSANameQualityARM {
+    fn default() -> Self {
+        Self {
+            name: unsafe { mem::zeroed() },
+            quality_flags: Default::default(),
+        }
+    }
+}
+
+/// returned_only
+#[repr(C)]
+#[derive(Copy, Clone, Debug)]
+pub struct QueueFamilyDataGraphTOSAPropertiesARM<'a> {
+    pub s_type: StructureType,
+    /// Nullable
+    pub next: *mut c_void,
+    pub profile_count: u32,
+    /// Len: `profile_count`
+    pub profiles: *const DataGraphTOSANameQualityARM,
+    pub extension_count: u32,
+    /// Len: `extension_count`
+    pub extensions: *const DataGraphTOSANameQualityARM,
+    pub level: DataGraphTOSALevelARM,
+    pub _marker: PhantomData<&'a ()>,
+}
+impl Default for QueueFamilyDataGraphTOSAPropertiesARM<'_> {
+    fn default() -> Self {
+        Self {
+            s_type: StructureType::QueueFamilyDataGraphTOSAPropertiesARM,
+            next: ptr::null_mut(),
+            profile_count: 0,
+            profiles: ptr::null_mut(),
+            extension_count: 0,
+            extensions: ptr::null_mut(),
+            level: Default::default(),
+            _marker: PhantomData,
+        }
+    }
+}
+
+#[repr(C)]
+#[derive(Copy, Clone, Debug)]
+pub struct DataGraphPipelineSingleNodeConnectionARM<'a> {
+    pub s_type: StructureType,
+    /// Nullable
+    pub next: *mut c_void,
+    pub set: u32,
+    pub binding: u32,
+    pub connection: DataGraphPipelineNodeConnectionTypeARM,
+    pub _marker: PhantomData<&'a ()>,
+}
+impl Default for DataGraphPipelineSingleNodeConnectionARM<'_> {
+    fn default() -> Self {
+        Self {
+            s_type: StructureType::DataGraphPipelineSingleNodeConnectionARM,
+            next: ptr::null_mut(),
+            set: 0,
+            binding: 0,
+            connection: Default::default(),
+            _marker: PhantomData,
+        }
+    }
+}
+
+/// Extends: `PhysicalDeviceFeatures2`, `DeviceCreateInfo`
+#[repr(C)]
+#[derive(Copy, Clone, Debug)]
+pub struct PhysicalDeviceDataGraphOpticalFlowFeaturesARM<'a> {
+    pub s_type: StructureType,
+    /// Nullable
+    pub next: *mut c_void,
+    pub data_graph_optical_flow: Bool32,
+    pub _marker: PhantomData<&'a ()>,
+}
+impl Default for PhysicalDeviceDataGraphOpticalFlowFeaturesARM<'_> {
+    fn default() -> Self {
+        Self {
+            s_type: StructureType::PhysicalDeviceDataGraphOpticalFlowFeaturesARM,
+            next: ptr::null_mut(),
+            data_graph_optical_flow: FALSE,
+            _marker: PhantomData,
+        }
+    }
+}
+
+impl ExtendsPhysicalDeviceFeatures2 for PhysicalDeviceDataGraphOpticalFlowFeaturesARM<'_> {}
+impl ExtendsDeviceCreateInfo for PhysicalDeviceDataGraphOpticalFlowFeaturesARM<'_> {}
+
+/// returned_only
+#[repr(C)]
+#[derive(Copy, Clone, Debug)]
+pub struct QueueFamilyDataGraphOpticalFlowPropertiesARM<'a> {
+    pub s_type: StructureType,
+    /// Nullable
+    pub next: *mut c_void,
+    pub supported_output_grid_sizes: DataGraphOpticalFlowGridSizeFlagsARM,
+    pub supported_hint_grid_sizes: DataGraphOpticalFlowGridSizeFlagsARM,
+    pub hint_supported: Bool32,
+    pub cost_supported: Bool32,
+    pub min_width: u32,
+    pub min_height: u32,
+    pub max_width: u32,
+    pub max_height: u32,
+    pub _marker: PhantomData<&'a ()>,
+}
+impl Default for QueueFamilyDataGraphOpticalFlowPropertiesARM<'_> {
+    fn default() -> Self {
+        Self {
+            s_type: StructureType::QueueFamilyDataGraphOpticalFlowPropertiesARM,
+            next: ptr::null_mut(),
+            supported_output_grid_sizes: Default::default(),
+            supported_hint_grid_sizes: Default::default(),
+            hint_supported: FALSE,
+            cost_supported: FALSE,
+            min_width: 0,
+            min_height: 0,
+            max_width: 0,
+            max_height: 0,
+            _marker: PhantomData,
+        }
+    }
+}
+
+/// Extends: `PhysicalDeviceImageFormatInfo2`, `ImageCreateInfo`
+#[repr(C)]
+#[derive(Copy, Clone, Debug)]
+pub struct DataGraphOpticalFlowImageFormatInfoARM<'a> {
+    pub s_type: StructureType,
+    /// Nullable
+    pub next: *const c_void,
+    pub usage: DataGraphOpticalFlowImageUsageFlagsARM,
+    pub _marker: PhantomData<&'a ()>,
+}
+impl Default for DataGraphOpticalFlowImageFormatInfoARM<'_> {
+    fn default() -> Self {
+        Self {
+            s_type: StructureType::DataGraphOpticalFlowImageFormatInfoARM,
+            next: ptr::null_mut(),
+            usage: Default::default(),
+            _marker: PhantomData,
+        }
+    }
+}
+
+impl ExtendsPhysicalDeviceImageFormatInfo2 for DataGraphOpticalFlowImageFormatInfoARM<'_> {}
+impl ExtendsImageCreateInfo for DataGraphOpticalFlowImageFormatInfoARM<'_> {}
+
+/// returned_only
+#[repr(C)]
+#[derive(Copy, Clone, Debug)]
+pub struct DataGraphOpticalFlowImageFormatPropertiesARM<'a> {
+    pub s_type: StructureType,
+    /// Nullable
+    pub next: *mut c_void,
+    pub format: Format,
+    pub _marker: PhantomData<&'a ()>,
+}
+impl Default for DataGraphOpticalFlowImageFormatPropertiesARM<'_> {
+    fn default() -> Self {
+        Self {
+            s_type: StructureType::DataGraphOpticalFlowImageFormatPropertiesARM,
+            next: ptr::null_mut(),
+            format: Default::default(),
+            _marker: PhantomData,
+        }
+    }
+}
+
+/// Extends: `DataGraphPipelineCreateInfoARM`
+#[repr(C)]
+#[derive(Copy, Clone, Debug)]
+pub struct DataGraphPipelineSingleNodeCreateInfoARM<'a> {
+    pub s_type: StructureType,
+    /// Nullable
+    pub next: *mut c_void,
+    pub node_type: DataGraphPipelineNodeTypeARM,
+    pub connection_count: u32,
+    /// Len: `connection_count`
+    pub connections: *const DataGraphPipelineSingleNodeConnectionARM<'a>,
+    pub _marker: PhantomData<&'a ()>,
+}
+impl Default for DataGraphPipelineSingleNodeCreateInfoARM<'_> {
+    fn default() -> Self {
+        Self {
+            s_type: StructureType::DataGraphPipelineSingleNodeCreateInfoARM,
+            next: ptr::null_mut(),
+            node_type: Default::default(),
+            connection_count: 0,
+            connections: ptr::null_mut(),
+            _marker: PhantomData,
+        }
+    }
+}
+
+impl ExtendsDataGraphPipelineCreateInfoARM for DataGraphPipelineSingleNodeCreateInfoARM<'_> {}
+
+/// Extends: `DataGraphPipelineCreateInfoARM`
+#[repr(C)]
+#[derive(Copy, Clone, Debug)]
+pub struct DataGraphPipelineOpticalFlowCreateInfoARM<'a> {
+    pub s_type: StructureType,
+    /// Nullable
+    pub next: *mut c_void,
+    pub width: u32,
+    pub height: u32,
+    pub image_format: Format,
+    pub flow_vector_format: Format,
+    pub cost_format: Format,
+    pub output_grid_size: DataGraphOpticalFlowGridSizeFlagsARM,
+    pub hint_grid_size: DataGraphOpticalFlowGridSizeFlagsARM,
+    pub performance_level: DataGraphOpticalFlowPerformanceLevelARM,
+    pub flags: DataGraphOpticalFlowCreateFlagsARM,
+    pub _marker: PhantomData<&'a ()>,
+}
+impl Default for DataGraphPipelineOpticalFlowCreateInfoARM<'_> {
+    fn default() -> Self {
+        Self {
+            s_type: StructureType::DataGraphPipelineOpticalFlowCreateInfoARM,
+            next: ptr::null_mut(),
+            width: 0,
+            height: 0,
+            image_format: Default::default(),
+            flow_vector_format: Default::default(),
+            cost_format: Default::default(),
+            output_grid_size: Default::default(),
+            hint_grid_size: Default::default(),
+            performance_level: Default::default(),
+            flags: Default::default(),
+            _marker: PhantomData,
+        }
+    }
+}
+
+impl ExtendsDataGraphPipelineCreateInfoARM for DataGraphPipelineOpticalFlowCreateInfoARM<'_> {}
+
+/// Extends: `DataGraphPipelineDispatchInfoARM`
+#[repr(C)]
+#[derive(Copy, Clone, Debug)]
+pub struct DataGraphPipelineOpticalFlowDispatchInfoARM<'a> {
+    pub s_type: StructureType,
+    /// Nullable
+    pub next: *mut c_void,
+    pub flags: DataGraphOpticalFlowExecuteFlagsARM,
+    pub mean_flow_l1_norm_hint: u32,
+    pub _marker: PhantomData<&'a ()>,
+}
+impl Default for DataGraphPipelineOpticalFlowDispatchInfoARM<'_> {
+    fn default() -> Self {
+        Self {
+            s_type: StructureType::DataGraphPipelineOpticalFlowDispatchInfoARM,
+            next: ptr::null_mut(),
+            flags: Default::default(),
+            mean_flow_l1_norm_hint: 0,
+            _marker: PhantomData,
+        }
+    }
+}
+
+impl ExtendsDataGraphPipelineDispatchInfoARM for DataGraphPipelineOpticalFlowDispatchInfoARM<'_> {}

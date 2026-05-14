@@ -3,6 +3,7 @@
 // Do not Edit! Execute `cargo run pyronyx-gen`
 // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
+#![deprecated = "This extension is deprecated. Use `VK_EXT_descriptor_heap` instead."]
 use crate::vk::*;
 use core::ffi::CStr;
 use core::ffi::c_void;

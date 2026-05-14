@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.2.5]
+
+### Updated to Vulkan 1.4.350.0
+
+Added 7 new extensions
+
 ## [0.2.4]
 
 ### Added

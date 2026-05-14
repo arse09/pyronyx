@@ -14,7 +14,7 @@ pub const SPEC_VERSION: u32 = 1;
 pub trait PipelinePropertiesDevice {
     fn get_pipeline_properties(
         &self,
-        pipeline_info: &PipelineInfoEXT,
+        pipeline_info: &PipelineInfoKHR,
     ) -> Result<BaseOutStructure<'_>>;
 }
 
@@ -23,7 +23,7 @@ impl PipelinePropertiesDevice for Device {
     #[inline]
     fn get_pipeline_properties(
         &self,
-        pipeline_info: &PipelineInfoEXT,
+        pipeline_info: &PipelineInfoKHR,
     ) -> Result<BaseOutStructure<'_>> {
         let mut out = MaybeUninit::uninit();
         let call = self

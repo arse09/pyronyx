@@ -12,3 +12,11 @@ pub mod pipeline_cache_incremental_mode {
     pub const NAME: &CStr = c"VK_SEC_pipeline_cache_incremental_mode";
     pub const SPEC_VERSION: u32 = 1;
 }
+pub mod ubm_surface;
+pub mod throttle_hint {
+    use core::ffi::CStr;
+
+    /// Type: `Device`
+    pub const NAME: &CStr = c"VK_SEC_throttle_hint";
+    pub const SPEC_VERSION: u32 = 1;
+}

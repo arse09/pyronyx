@@ -30,6 +30,7 @@ pub struct InstanceFn {
     pub nn_vi_surface: Option<InstanceFnNnViSurface>,
     pub ohos_surface: Option<InstanceFnOhosSurface>,
     pub qnx_screen_surface: Option<InstanceFnQnxScreenSurface>,
+    pub sec_ubm_surface: Option<InstanceFnSecUbmSurface>,
 }
 
 impl InstanceFn {
@@ -64,6 +65,7 @@ impl InstanceFn {
             nn_vi_surface: None,
             ohos_surface: None,
             qnx_screen_surface: None,
+            sec_ubm_surface: None,
         };
         for &ext in extensions {
             let ext = unsafe { CStr::from_ptr(ext).to_bytes() };
@@ -126,6 +128,9 @@ impl InstanceFn {
                 }
                 b"VK_QNX_screen_surface" => {
                     out.qnx_screen_surface = Some(InstanceFnQnxScreenSurface::load(&mut loader))
+                }
+                b"VK_SEC_ubm_surface" => {
+                    out.sec_ubm_surface = Some(InstanceFnSecUbmSurface::load(&mut loader))
                 }
                 _ => (),
             }
@@ -424,12 +429,27 @@ impl InstanceFnQnxScreenSurface {
 }
 
 #[derive(Clone)]
+pub struct InstanceFnSecUbmSurface {
+    pub create_ubm_surface_sec: vkCreateUbmSurfaceSEC,
+}
+
+impl InstanceFnSecUbmSurface {
+    pub fn load<F: FnMut(&CStr) -> *const c_void>(mut loader: F) -> Self {
+        Self {
+            create_ubm_surface_sec: to_panic(loader(c"vkCreateUbmSurfaceSEC")),
+        }
+    }
+}
+
+#[derive(Clone)]
 pub struct PhysicalDeviceFn {
     pub v1_0: PhysicalDeviceFnv1_0,
     pub v1_1: PhysicalDeviceFnv1_1,
     pub v1_3: PhysicalDeviceFnv1_3,
     pub arm_data_graph: Option<PhysicalDeviceFnArmDataGraph>,
+    pub arm_data_graph_optical_flow: Option<PhysicalDeviceFnArmDataGraphOpticalFlow>,
     pub arm_performance_counters_by_region: Option<PhysicalDeviceFnArmPerformanceCountersByRegion>,
+    pub arm_shader_instrumentation: Option<PhysicalDeviceFnArmShaderInstrumentation>,
     pub arm_tensors: Option<PhysicalDeviceFnArmTensors>,
     pub ext_acquire_drm_display: Option<PhysicalDeviceFnExtAcquireDrmDisplay>,
     pub ext_acquire_xlib_display: Option<PhysicalDeviceFnExtAcquireXlibDisplay>,
@@ -465,6 +485,7 @@ pub struct PhysicalDeviceFn {
     pub nv_external_sci_sync2: Option<PhysicalDeviceFnNvExternalSciSync2>,
     pub nv_optical_flow: Option<PhysicalDeviceFnNvOpticalFlow>,
     pub qnx_screen_surface: Option<PhysicalDeviceFnQnxScreenSurface>,
+    pub sec_ubm_surface: Option<PhysicalDeviceFnSecUbmSurface>,
 }
 
 impl PhysicalDeviceFn {
@@ -486,7 +507,9 @@ impl PhysicalDeviceFn {
                 PhysicalDeviceFnv1_3::default()
             },
             arm_data_graph: None,
+            arm_data_graph_optical_flow: None,
             arm_performance_counters_by_region: None,
+            arm_shader_instrumentation: None,
             arm_tensors: None,
             ext_acquire_drm_display: None,
             ext_acquire_xlib_display: None,
@@ -522,6 +545,7 @@ impl PhysicalDeviceFn {
             nv_external_sci_sync2: None,
             nv_optical_flow: None,
             qnx_screen_surface: None,
+            sec_ubm_surface: None,
         };
         for &ext in extensions {
             let ext = unsafe { CStr::from_ptr(ext).to_bytes() };
@@ -529,10 +553,18 @@ impl PhysicalDeviceFn {
                 b"VK_ARM_data_graph" => {
                     out.arm_data_graph = Some(PhysicalDeviceFnArmDataGraph::load(&mut loader))
                 }
+                b"VK_ARM_data_graph_optical_flow" => {
+                    out.arm_data_graph_optical_flow =
+                        Some(PhysicalDeviceFnArmDataGraphOpticalFlow::load(&mut loader))
+                }
                 b"VK_ARM_performance_counters_by_region" => {
                     out.arm_performance_counters_by_region = Some(
                         PhysicalDeviceFnArmPerformanceCountersByRegion::load(&mut loader),
                     )
+                }
+                b"VK_ARM_shader_instrumentation" => {
+                    out.arm_shader_instrumentation =
+                        Some(PhysicalDeviceFnArmShaderInstrumentation::load(&mut loader))
                 }
                 b"VK_ARM_tensors" => {
                     out.arm_tensors = Some(PhysicalDeviceFnArmTensors::load(&mut loader))
@@ -666,6 +698,9 @@ impl PhysicalDeviceFn {
                 b"VK_QNX_screen_surface" => {
                     out.qnx_screen_surface =
                         Some(PhysicalDeviceFnQnxScreenSurface::load(&mut loader))
+                }
+                b"VK_SEC_ubm_surface" => {
+                    out.sec_ubm_surface = Some(PhysicalDeviceFnSecUbmSurface::load(&mut loader))
                 }
                 _ => (),
             }
@@ -862,6 +897,27 @@ impl PhysicalDeviceFnArmDataGraph {
 }
 
 #[derive(Clone)]
+pub struct PhysicalDeviceFnArmDataGraphOpticalFlow {
+    pub get_physical_device_queue_family_data_graph_engine_operation_properties_arm:
+        vkGetPhysicalDeviceQueueFamilyDataGraphEngineOperationPropertiesARM,
+    pub get_physical_device_queue_family_data_graph_optical_flow_image_formats_arm:
+        vkGetPhysicalDeviceQueueFamilyDataGraphOpticalFlowImageFormatsARM,
+}
+
+impl PhysicalDeviceFnArmDataGraphOpticalFlow {
+    pub fn load<F: FnMut(&CStr) -> *const c_void>(mut loader: F) -> Self {
+        Self {
+            get_physical_device_queue_family_data_graph_engine_operation_properties_arm: to_panic(
+                loader(c"vkGetPhysicalDeviceQueueFamilyDataGraphEngineOperationPropertiesARM"),
+            ),
+            get_physical_device_queue_family_data_graph_optical_flow_image_formats_arm: to_panic(
+                loader(c"vkGetPhysicalDeviceQueueFamilyDataGraphOpticalFlowImageFormatsARM"),
+            ),
+        }
+    }
+}
+
+#[derive(Clone)]
 pub struct PhysicalDeviceFnArmPerformanceCountersByRegion {
     pub enumerate_physical_device_queue_family_performance_counters_by_region_arm:
         vkEnumeratePhysicalDeviceQueueFamilyPerformanceCountersByRegionARM,
@@ -873,6 +929,22 @@ impl PhysicalDeviceFnArmPerformanceCountersByRegion {
             enumerate_physical_device_queue_family_performance_counters_by_region_arm: to_panic(
                 loader(c"vkEnumeratePhysicalDeviceQueueFamilyPerformanceCountersByRegionARM"),
             ),
+        }
+    }
+}
+
+#[derive(Clone)]
+pub struct PhysicalDeviceFnArmShaderInstrumentation {
+    pub enumerate_physical_device_shader_instrumentation_metrics_arm:
+        vkEnumeratePhysicalDeviceShaderInstrumentationMetricsARM,
+}
+
+impl PhysicalDeviceFnArmShaderInstrumentation {
+    pub fn load<F: FnMut(&CStr) -> *const c_void>(mut loader: F) -> Self {
+        Self {
+            enumerate_physical_device_shader_instrumentation_metrics_arm: to_panic(loader(
+                c"vkEnumeratePhysicalDeviceShaderInstrumentationMetricsARM",
+            )),
         }
     }
 }
@@ -1483,6 +1555,22 @@ impl PhysicalDeviceFnQnxScreenSurface {
 }
 
 #[derive(Clone)]
+pub struct PhysicalDeviceFnSecUbmSurface {
+    pub get_physical_device_ubm_presentation_support_sec:
+        vkGetPhysicalDeviceUbmPresentationSupportSEC,
+}
+
+impl PhysicalDeviceFnSecUbmSurface {
+    pub fn load<F: FnMut(&CStr) -> *const c_void>(mut loader: F) -> Self {
+        Self {
+            get_physical_device_ubm_presentation_support_sec: to_panic(loader(
+                c"vkGetPhysicalDeviceUbmPresentationSupportSEC",
+            )),
+        }
+    }
+}
+
+#[derive(Clone)]
 pub struct DeviceFn {
     pub v1_0: DeviceFnv1_0,
     pub v1_1: DeviceFnv1_1,
@@ -1496,6 +1584,7 @@ pub struct DeviceFn {
     pub android_external_memory_android_hardware_buffer:
         Option<DeviceFnAndroidExternalMemoryAndroidHardwareBuffer>,
     pub arm_data_graph: Option<DeviceFnArmDataGraph>,
+    pub arm_shader_instrumentation: Option<DeviceFnArmShaderInstrumentation>,
     pub arm_tensors: Option<DeviceFnArmTensors>,
     pub ext_debug_marker: Option<DeviceFnExtDebugMarker>,
     pub ext_debug_utils: Option<DeviceFnExtDebugUtils>,
@@ -1526,6 +1615,8 @@ pub struct DeviceFn {
     pub khr_acceleration_structure: Option<DeviceFnKhrAccelerationStructure>,
     pub khr_calibrated_timestamps: Option<DeviceFnKhrCalibratedTimestamps>,
     pub khr_deferred_host_operations: Option<DeviceFnKhrDeferredHostOperations>,
+    pub khr_device_address_commands: Option<DeviceFnKhrDeviceAddressCommands>,
+    pub khr_device_fault: Option<DeviceFnKhrDeviceFault>,
     pub khr_device_group: Option<DeviceFnKhrDeviceGroup>,
     pub khr_display_swapchain: Option<DeviceFnKhrDisplaySwapchain>,
     pub khr_external_fence_fd: Option<DeviceFnKhrExternalFenceFd>,
@@ -1602,6 +1693,7 @@ impl DeviceFn {
             amdx_shader_enqueue: None,
             android_external_memory_android_hardware_buffer: None,
             arm_data_graph: None,
+            arm_shader_instrumentation: None,
             arm_tensors: None,
             ext_debug_marker: None,
             ext_debug_utils: None,
@@ -1632,6 +1724,8 @@ impl DeviceFn {
             khr_acceleration_structure: None,
             khr_calibrated_timestamps: None,
             khr_deferred_host_operations: None,
+            khr_device_address_commands: None,
+            khr_device_fault: None,
             khr_device_group: None,
             khr_display_swapchain: None,
             khr_external_fence_fd: None,
@@ -1696,6 +1790,10 @@ impl DeviceFn {
                 }
                 b"VK_ARM_data_graph" => {
                     out.arm_data_graph = Some(DeviceFnArmDataGraph::load(&mut loader))
+                }
+                b"VK_ARM_shader_instrumentation" => {
+                    out.arm_shader_instrumentation =
+                        Some(DeviceFnArmShaderInstrumentation::load(&mut loader))
                 }
                 b"VK_ARM_tensors" => out.arm_tensors = Some(DeviceFnArmTensors::load(&mut loader)),
                 b"VK_EXT_debug_marker" => {
@@ -1800,6 +1898,13 @@ impl DeviceFn {
                 b"VK_KHR_deferred_host_operations" => {
                     out.khr_deferred_host_operations =
                         Some(DeviceFnKhrDeferredHostOperations::load(&mut loader))
+                }
+                b"VK_KHR_device_address_commands" => {
+                    out.khr_device_address_commands =
+                        Some(DeviceFnKhrDeviceAddressCommands::load(&mut loader))
+                }
+                b"VK_KHR_device_fault" => {
+                    out.khr_device_fault = Some(DeviceFnKhrDeviceFault::load(&mut loader))
                 }
                 b"VK_KHR_device_group" => {
                     out.khr_device_group = Some(DeviceFnKhrDeviceGroup::load(&mut loader))
@@ -2497,6 +2602,33 @@ impl DeviceFnArmDataGraph {
 }
 
 #[derive(Clone)]
+pub struct DeviceFnArmShaderInstrumentation {
+    pub create_shader_instrumentation_arm: vkCreateShaderInstrumentationARM,
+    pub destroy_shader_instrumentation_arm: vkDestroyShaderInstrumentationARM,
+    pub get_shader_instrumentation_values_arm: vkGetShaderInstrumentationValuesARM,
+    pub clear_shader_instrumentation_metrics_arm: vkClearShaderInstrumentationMetricsARM,
+}
+
+impl DeviceFnArmShaderInstrumentation {
+    pub fn load<F: FnMut(&CStr) -> *const c_void>(mut loader: F) -> Self {
+        Self {
+            create_shader_instrumentation_arm: to_panic(loader(
+                c"vkCreateShaderInstrumentationARM",
+            )),
+            destroy_shader_instrumentation_arm: to_panic(loader(
+                c"vkDestroyShaderInstrumentationARM",
+            )),
+            get_shader_instrumentation_values_arm: to_panic(loader(
+                c"vkGetShaderInstrumentationValuesARM",
+            )),
+            clear_shader_instrumentation_metrics_arm: to_panic(loader(
+                c"vkClearShaderInstrumentationMetricsARM",
+            )),
+        }
+    }
+}
+
+#[derive(Clone)]
 pub struct DeviceFnArmTensors {
     pub create_tensor_arm: vkCreateTensorARM,
     pub destroy_tensor_arm: vkDestroyTensorARM,
@@ -3145,6 +3277,36 @@ impl DeviceFnKhrDeferredHostOperations {
             )),
             get_deferred_operation_result_khr: to_panic(loader(c"vkGetDeferredOperationResultKHR")),
             deferred_operation_join_khr: to_panic(loader(c"vkDeferredOperationJoinKHR")),
+        }
+    }
+}
+
+#[derive(Clone)]
+pub struct DeviceFnKhrDeviceAddressCommands {
+    pub create_acceleration_structure2_khr: vkCreateAccelerationStructure2KHR,
+}
+
+impl DeviceFnKhrDeviceAddressCommands {
+    pub fn load<F: FnMut(&CStr) -> *const c_void>(mut loader: F) -> Self {
+        Self {
+            create_acceleration_structure2_khr: to_panic(loader(
+                c"vkCreateAccelerationStructure2KHR",
+            )),
+        }
+    }
+}
+
+#[derive(Clone)]
+pub struct DeviceFnKhrDeviceFault {
+    pub get_device_fault_reports_khr: vkGetDeviceFaultReportsKHR,
+    pub get_device_fault_debug_info_khr: vkGetDeviceFaultDebugInfoKHR,
+}
+
+impl DeviceFnKhrDeviceFault {
+    pub fn load<F: FnMut(&CStr) -> *const c_void>(mut loader: F) -> Self {
+        Self {
+            get_device_fault_reports_khr: to_panic(loader(c"vkGetDeviceFaultReportsKHR")),
+            get_device_fault_debug_info_khr: to_panic(loader(c"vkGetDeviceFaultDebugInfoKHR")),
         }
     }
 }
@@ -3880,6 +4042,7 @@ pub struct QueueFn {
     pub khr_swapchain: Option<QueueFnKhrSwapchain>,
     pub nv_device_diagnostic_checkpoints: Option<QueueFnNvDeviceDiagnosticCheckpoints>,
     pub nv_low_latency2: Option<QueueFnNvLowLatency2>,
+    pub qcom_queue_perf_hint: Option<QueueFnQcomQueuePerfHint>,
 }
 
 impl QueueFn {
@@ -3900,6 +4063,7 @@ impl QueueFn {
             khr_swapchain: None,
             nv_device_diagnostic_checkpoints: None,
             nv_low_latency2: None,
+            qcom_queue_perf_hint: None,
         };
         for &ext in extensions {
             let ext = unsafe { CStr::from_ptr(ext).to_bytes() };
@@ -3920,6 +4084,9 @@ impl QueueFn {
                 }
                 b"VK_NV_low_latency2" => {
                     out.nv_low_latency2 = Some(QueueFnNvLowLatency2::load(&mut loader))
+                }
+                b"VK_QCOM_queue_perf_hint" => {
+                    out.qcom_queue_perf_hint = Some(QueueFnQcomQueuePerfHint::load(&mut loader))
                 }
                 _ => (),
             }
@@ -4036,6 +4203,19 @@ impl QueueFnNvLowLatency2 {
 }
 
 #[derive(Clone)]
+pub struct QueueFnQcomQueuePerfHint {
+    pub queue_set_perf_hint_qcom: vkQueueSetPerfHintQCOM,
+}
+
+impl QueueFnQcomQueuePerfHint {
+    pub fn load<F: FnMut(&CStr) -> *const c_void>(mut loader: F) -> Self {
+        Self {
+            queue_set_perf_hint_qcom: to_panic(loader(c"vkQueueSetPerfHintQCOM")),
+        }
+    }
+}
+
+#[derive(Clone)]
 pub struct CommandBufferFn {
     pub v1_0: CommandBufferFnv1_0,
     pub v1_1: CommandBufferFnv1_1,
@@ -4045,6 +4225,8 @@ pub struct CommandBufferFn {
     pub amd_buffer_marker: Option<CommandBufferFnAmdBufferMarker>,
     pub amdx_shader_enqueue: Option<CommandBufferFnAmdxShaderEnqueue>,
     pub arm_data_graph: Option<CommandBufferFnArmDataGraph>,
+    pub arm_scheduling_controls: Option<CommandBufferFnArmSchedulingControls>,
+    pub arm_shader_instrumentation: Option<CommandBufferFnArmShaderInstrumentation>,
     pub arm_tensors: Option<CommandBufferFnArmTensors>,
     pub ext_attachment_feedback_loop_dynamic_state:
         Option<CommandBufferFnExtAttachmentFeedbackLoopDynamicState>,
@@ -4063,6 +4245,7 @@ pub struct CommandBufferFn {
     pub ext_mesh_shader: Option<CommandBufferFnExtMeshShader>,
     pub ext_multi_draw: Option<CommandBufferFnExtMultiDraw>,
     pub ext_opacity_micromap: Option<CommandBufferFnExtOpacityMicromap>,
+    pub ext_primitive_restart_index: Option<CommandBufferFnExtPrimitiveRestartIndex>,
     pub ext_sample_locations: Option<CommandBufferFnExtSampleLocations>,
     pub ext_shader_object: Option<CommandBufferFnExtShaderObject>,
     pub ext_transform_feedback: Option<CommandBufferFnExtTransformFeedback>,
@@ -4072,6 +4255,7 @@ pub struct CommandBufferFn {
     pub intel_performance_query: Option<CommandBufferFnIntelPerformanceQuery>,
     pub khr_acceleration_structure: Option<CommandBufferFnKhrAccelerationStructure>,
     pub khr_copy_memory_indirect: Option<CommandBufferFnKhrCopyMemoryIndirect>,
+    pub khr_device_address_commands: Option<CommandBufferFnKhrDeviceAddressCommands>,
     pub khr_fragment_shading_rate: Option<CommandBufferFnKhrFragmentShadingRate>,
     pub khr_maintenance10: Option<CommandBufferFnKhrMaintenance10>,
     pub khr_maintenance6: Option<CommandBufferFnKhrMaintenance6>,
@@ -4136,6 +4320,8 @@ impl CommandBufferFn {
             amd_buffer_marker: None,
             amdx_shader_enqueue: None,
             arm_data_graph: None,
+            arm_scheduling_controls: None,
+            arm_shader_instrumentation: None,
             arm_tensors: None,
             ext_attachment_feedback_loop_dynamic_state: None,
             ext_color_write_enable: None,
@@ -4153,6 +4339,7 @@ impl CommandBufferFn {
             ext_mesh_shader: None,
             ext_multi_draw: None,
             ext_opacity_micromap: None,
+            ext_primitive_restart_index: None,
             ext_sample_locations: None,
             ext_shader_object: None,
             ext_transform_feedback: None,
@@ -4162,6 +4349,7 @@ impl CommandBufferFn {
             intel_performance_query: None,
             khr_acceleration_structure: None,
             khr_copy_memory_indirect: None,
+            khr_device_address_commands: None,
             khr_fragment_shading_rate: None,
             khr_maintenance10: None,
             khr_maintenance6: None,
@@ -4204,6 +4392,14 @@ impl CommandBufferFn {
                 }
                 b"VK_ARM_data_graph" => {
                     out.arm_data_graph = Some(CommandBufferFnArmDataGraph::load(&mut loader))
+                }
+                b"VK_ARM_scheduling_controls" => {
+                    out.arm_scheduling_controls =
+                        Some(CommandBufferFnArmSchedulingControls::load(&mut loader))
+                }
+                b"VK_ARM_shader_instrumentation" => {
+                    out.arm_shader_instrumentation =
+                        Some(CommandBufferFnArmShaderInstrumentation::load(&mut loader))
                 }
                 b"VK_ARM_tensors" => {
                     out.arm_tensors = Some(CommandBufferFnArmTensors::load(&mut loader))
@@ -4269,6 +4465,10 @@ impl CommandBufferFn {
                     out.ext_opacity_micromap =
                         Some(CommandBufferFnExtOpacityMicromap::load(&mut loader))
                 }
+                b"VK_EXT_primitive_restart_index" => {
+                    out.ext_primitive_restart_index =
+                        Some(CommandBufferFnExtPrimitiveRestartIndex::load(&mut loader))
+                }
                 b"VK_EXT_sample_locations" => {
                     out.ext_sample_locations =
                         Some(CommandBufferFnExtSampleLocations::load(&mut loader))
@@ -4303,6 +4503,10 @@ impl CommandBufferFn {
                 b"VK_KHR_copy_memory_indirect" => {
                     out.khr_copy_memory_indirect =
                         Some(CommandBufferFnKhrCopyMemoryIndirect::load(&mut loader))
+                }
+                b"VK_KHR_device_address_commands" => {
+                    out.khr_device_address_commands =
+                        Some(CommandBufferFnKhrDeviceAddressCommands::load(&mut loader))
                 }
                 b"VK_KHR_fragment_shading_rate" => {
                     out.khr_fragment_shading_rate =
@@ -4833,6 +5037,36 @@ impl CommandBufferFnArmDataGraph {
 }
 
 #[derive(Clone)]
+pub struct CommandBufferFnArmSchedulingControls {
+    pub set_dispatch_parameters_arm: vkCmdSetDispatchParametersARM,
+}
+
+impl CommandBufferFnArmSchedulingControls {
+    pub fn load<F: FnMut(&CStr) -> *const c_void>(mut loader: F) -> Self {
+        Self {
+            set_dispatch_parameters_arm: to_panic(loader(c"vkCmdSetDispatchParametersARM")),
+        }
+    }
+}
+
+#[derive(Clone)]
+pub struct CommandBufferFnArmShaderInstrumentation {
+    pub begin_shader_instrumentation_arm: vkCmdBeginShaderInstrumentationARM,
+    pub end_shader_instrumentation_arm: vkCmdEndShaderInstrumentationARM,
+}
+
+impl CommandBufferFnArmShaderInstrumentation {
+    pub fn load<F: FnMut(&CStr) -> *const c_void>(mut loader: F) -> Self {
+        Self {
+            begin_shader_instrumentation_arm: to_panic(loader(
+                c"vkCmdBeginShaderInstrumentationARM",
+            )),
+            end_shader_instrumentation_arm: to_panic(loader(c"vkCmdEndShaderInstrumentationARM")),
+        }
+    }
+}
+
+#[derive(Clone)]
 pub struct CommandBufferFnArmTensors {
     pub copy_tensor_arm: vkCmdCopyTensorARM,
 }
@@ -5108,6 +5342,19 @@ impl CommandBufferFnExtOpacityMicromap {
 }
 
 #[derive(Clone)]
+pub struct CommandBufferFnExtPrimitiveRestartIndex {
+    pub set_primitive_restart_index_ext: vkCmdSetPrimitiveRestartIndexEXT,
+}
+
+impl CommandBufferFnExtPrimitiveRestartIndex {
+    pub fn load<F: FnMut(&CStr) -> *const c_void>(mut loader: F) -> Self {
+        Self {
+            set_primitive_restart_index_ext: to_panic(loader(c"vkCmdSetPrimitiveRestartIndexEXT")),
+        }
+    }
+}
+
+#[derive(Clone)]
 pub struct CommandBufferFnExtSampleLocations {
     pub set_sample_locations_ext: vkCmdSetSampleLocationsEXT,
 }
@@ -5348,6 +5595,69 @@ impl CommandBufferFnKhrCopyMemoryIndirect {
             copy_memory_to_image_indirect_khr: to_panic(loader(
                 c"vkCmdCopyMemoryToImageIndirectKHR",
             )),
+        }
+    }
+}
+
+#[derive(Clone)]
+pub struct CommandBufferFnKhrDeviceAddressCommands {
+    pub copy_memory_khr: vkCmdCopyMemoryKHR,
+    pub copy_memory_to_image_khr: vkCmdCopyMemoryToImageKHR,
+    pub copy_image_to_memory_khr: vkCmdCopyImageToMemoryKHR,
+    pub update_memory_khr: vkCmdUpdateMemoryKHR,
+    pub fill_memory_khr: vkCmdFillMemoryKHR,
+    pub copy_query_pool_results_to_memory_khr: vkCmdCopyQueryPoolResultsToMemoryKHR,
+    pub begin_conditional_rendering2_ext: vkCmdBeginConditionalRendering2EXT,
+    pub bind_transform_feedback_buffers2_ext: vkCmdBindTransformFeedbackBuffers2EXT,
+    pub begin_transform_feedback2_ext: vkCmdBeginTransformFeedback2EXT,
+    pub end_transform_feedback2_ext: vkCmdEndTransformFeedback2EXT,
+    pub draw_indirect_byte_count2_ext: vkCmdDrawIndirectByteCount2EXT,
+    pub write_marker_to_memory_amd: vkCmdWriteMarkerToMemoryAMD,
+    pub bind_index_buffer3_khr: vkCmdBindIndexBuffer3KHR,
+    pub bind_vertex_buffers3_khr: vkCmdBindVertexBuffers3KHR,
+    pub draw_indirect2_khr: vkCmdDrawIndirect2KHR,
+    pub draw_indexed_indirect2_khr: vkCmdDrawIndexedIndirect2KHR,
+    pub draw_indirect_count2_khr: vkCmdDrawIndirectCount2KHR,
+    pub draw_indexed_indirect_count2_khr: vkCmdDrawIndexedIndirectCount2KHR,
+    pub draw_mesh_tasks_indirect2_ext: vkCmdDrawMeshTasksIndirect2EXT,
+    pub draw_mesh_tasks_indirect_count2_ext: vkCmdDrawMeshTasksIndirectCount2EXT,
+    pub dispatch_indirect2_khr: vkCmdDispatchIndirect2KHR,
+}
+
+impl CommandBufferFnKhrDeviceAddressCommands {
+    pub fn load<F: FnMut(&CStr) -> *const c_void>(mut loader: F) -> Self {
+        Self {
+            copy_memory_khr: to_panic(loader(c"vkCmdCopyMemoryKHR")),
+            copy_memory_to_image_khr: to_panic(loader(c"vkCmdCopyMemoryToImageKHR")),
+            copy_image_to_memory_khr: to_panic(loader(c"vkCmdCopyImageToMemoryKHR")),
+            update_memory_khr: to_panic(loader(c"vkCmdUpdateMemoryKHR")),
+            fill_memory_khr: to_panic(loader(c"vkCmdFillMemoryKHR")),
+            copy_query_pool_results_to_memory_khr: to_panic(loader(
+                c"vkCmdCopyQueryPoolResultsToMemoryKHR",
+            )),
+            begin_conditional_rendering2_ext: to_panic(loader(
+                c"vkCmdBeginConditionalRendering2EXT",
+            )),
+            bind_transform_feedback_buffers2_ext: to_panic(loader(
+                c"vkCmdBindTransformFeedbackBuffers2EXT",
+            )),
+            begin_transform_feedback2_ext: to_panic(loader(c"vkCmdBeginTransformFeedback2EXT")),
+            end_transform_feedback2_ext: to_panic(loader(c"vkCmdEndTransformFeedback2EXT")),
+            draw_indirect_byte_count2_ext: to_panic(loader(c"vkCmdDrawIndirectByteCount2EXT")),
+            write_marker_to_memory_amd: to_panic(loader(c"vkCmdWriteMarkerToMemoryAMD")),
+            bind_index_buffer3_khr: to_panic(loader(c"vkCmdBindIndexBuffer3KHR")),
+            bind_vertex_buffers3_khr: to_panic(loader(c"vkCmdBindVertexBuffers3KHR")),
+            draw_indirect2_khr: to_panic(loader(c"vkCmdDrawIndirect2KHR")),
+            draw_indexed_indirect2_khr: to_panic(loader(c"vkCmdDrawIndexedIndirect2KHR")),
+            draw_indirect_count2_khr: to_panic(loader(c"vkCmdDrawIndirectCount2KHR")),
+            draw_indexed_indirect_count2_khr: to_panic(loader(
+                c"vkCmdDrawIndexedIndirectCount2KHR",
+            )),
+            draw_mesh_tasks_indirect2_ext: to_panic(loader(c"vkCmdDrawMeshTasksIndirect2EXT")),
+            draw_mesh_tasks_indirect_count2_ext: to_panic(loader(
+                c"vkCmdDrawMeshTasksIndirectCount2EXT",
+            )),
+            dispatch_indirect2_khr: to_panic(loader(c"vkCmdDispatchIndirect2KHR")),
         }
     }
 }

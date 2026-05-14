@@ -62,6 +62,7 @@ vk_bitflags_wrapped!(PipelineLayoutCreateFlags, Flags);
 
 impl PipelineLayoutCreateFlags {
     pub const IndependentSetsEXT: Self = Self(0b10);
+    pub const NoTaskShaderKHR: Self = Self(0b100);
 }
 
 /// <https://docs.vulkan.org/refpages/latest/refpages/source/VkPipelineCacheCreateFlagBits.html>
@@ -449,6 +450,7 @@ impl ImageCreateFlags {
     pub const Type2DViewCompatibleEXT: Self = Self(0b10_0000_0000_0000_0000);
     pub const VideoProfileIndependentKHR: Self = Self(0b1_0000_0000_0000_0000_0000);
     pub const FragmentDensityMapOffsetEXT: Self = Self(0b1000_0000_0000_0000);
+    pub const AliasSingleLayerDescriptorKHR: Self = Self(0b100_0000_0000_0000_0000_0000);
 }
 
 /// <https://docs.vulkan.org/refpages/latest/refpages/source/VkImageViewCreateFlagBits.html>
@@ -1375,6 +1377,9 @@ impl FormatFeatureFlags2 {
     pub const DepthCopyOnTransferQueueKHR: Self = Self(0);
     pub const StencilCopyOnComputeQueueKHR: Self = Self(0);
     pub const StencilCopyOnTransferQueueKHR: Self = Self(0);
+    pub const DataGraphOpticalFlowImageARM: Self = Self(0);
+    pub const DataGraphOpticalFlowVectorARM: Self = Self(0);
+    pub const DataGraphOpticalFlowCostARM: Self = Self(0);
 }
 
 /// <https://docs.vulkan.org/refpages/latest/refpages/source/VkRenderingFlagBits.html>
@@ -1404,6 +1409,21 @@ vk_bitflags_wrapped!(MemoryDecompressionMethodFlagsEXT, Flags64);
 
 impl MemoryDecompressionMethodFlagsEXT {
     pub const Gdeflate10: Self = Self(0b1);
+}
+
+/// <https://docs.vulkan.org/refpages/latest/refpages/source/VkDeviceFaultFlagBitsKHR.html>
+#[repr(transparent)]
+#[derive(Clone, Copy, Hash, PartialEq, Eq)]
+pub struct DeviceFaultFlagsKHR(pub(crate) Flags);
+vk_bitflags_wrapped!(DeviceFaultFlagsKHR, Flags);
+
+impl DeviceFaultFlagsKHR {
+    pub const FlagDeviceLost: Self = Self(0b1);
+    pub const FlagMemoryAddress: Self = Self(0b10);
+    pub const FlagInstructionAddress: Self = Self(0b100);
+    pub const FlagVendor: Self = Self(0b1000);
+    pub const FlagWatchdogTimeout: Self = Self(0b1_0000);
+    pub const FlagOverflow: Self = Self(0b10_0000);
 }
 
 /// <https://docs.vulkan.org/refpages/latest/refpages/source/VkBuildMicromapFlagBitsEXT.html>
@@ -1497,6 +1517,7 @@ impl PipelineCreateFlags2 {
     pub const RayTracingDisplacementMicromapNV: Self = Self(0b1_0000_0000_0000_0000_0000_0000_0000);
     pub const DescriptorBufferEXT: Self = Self(0b10_0000_0000_0000_0000_0000_0000_0000);
     pub const DisallowOpacityMicromapARM: Self = Self(0);
+    pub const InstrumentShadersARM: Self = Self(0);
     pub const CaptureDataKHR: Self = Self(0b1000_0000_0000_0000_0000_0000_0000_0000);
     pub const IndirectBindableEXT: Self = Self(0);
     pub const PerLayerFragmentDensityVALVE: Self = Self(0);
@@ -1605,6 +1626,7 @@ vk_bitflags_wrapped!(DataGraphPipelineSessionCreateFlagsARM, Flags64);
 
 impl DataGraphPipelineSessionCreateFlagsARM {
     pub const Protected: Self = Self(0b1);
+    pub const OpticalFlowCache: Self = Self(0b10);
 }
 
 /// <https://docs.vulkan.org/refpages/latest/refpages/source/VkDataGraphPipelineDispatchFlagBitsARM.html>
@@ -1667,6 +1689,21 @@ impl SpirvResourceTypeFlagsEXT {
     pub const ReadWriteStorageBuffer: Self = Self(0b1000_0000);
     pub const AccelerationStructure: Self = Self(0b1_0000_0000);
     pub const Tensor: Self = Self(0b10_0000_0000);
+}
+
+/// <https://docs.vulkan.org/refpages/latest/refpages/source/VkAddressCommandFlagBitsKHR.html>
+#[repr(transparent)]
+#[derive(Clone, Copy, Hash, PartialEq, Eq)]
+pub struct AddressCommandFlagsKHR(pub(crate) Flags);
+vk_bitflags_wrapped!(AddressCommandFlagsKHR, Flags);
+
+impl AddressCommandFlagsKHR {
+    pub const Protected: Self = Self(0b1);
+    pub const FullyBound: Self = Self(0b10);
+    pub const StorageBufferUsage: Self = Self(0b100);
+    pub const UnknownStorageBufferUsage: Self = Self(0b1000);
+    pub const TransformFeedbackBufferUsage: Self = Self(0b1_0000);
+    pub const UnknownTransformFeedbackBufferUsage: Self = Self(0b10_0000);
 }
 
 /// <https://docs.vulkan.org/refpages/latest/refpages/source/VkCompositeAlphaFlagBitsKHR.html>
@@ -1747,6 +1784,9 @@ pub type ViSurfaceCreateFlagsNN = Flags;
 
 /// <https://docs.vulkan.org/refpages/latest/refpages/source/VkWaylandSurfaceCreateFlagsKHR.html>
 pub type WaylandSurfaceCreateFlagsKHR = Flags;
+
+/// <https://docs.vulkan.org/refpages/latest/refpages/source/VkUbmSurfaceCreateFlagsSEC.html>
+pub type UbmSurfaceCreateFlagsSEC = Flags;
 
 /// <https://docs.vulkan.org/refpages/latest/refpages/source/VkWin32SurfaceCreateFlagsKHR.html>
 pub type Win32SurfaceCreateFlagsKHR = Flags;
@@ -2378,6 +2418,7 @@ vk_bitflags_wrapped!(ShaderCreateFlagsEXT, Flags);
 impl ShaderCreateFlagsEXT {
     pub const LinkStage: Self = Self(0b1);
     pub const DescriptorHeap: Self = Self(0b100_0000_0000);
+    pub const InstrumentShader: Self = Self(0b1000_0000_0000);
     pub const AllowVaryingSubgroupSize: Self = Self(0b10);
     pub const RequireFullSubgroups: Self = Self(0b100);
     pub const NoTaskShader: Self = Self(0b1000);
@@ -2386,6 +2427,7 @@ impl ShaderCreateFlagsEXT {
     pub const FragmentDensityMapAttachment: Self = Self(0b100_0000);
     pub const IndirectBindable: Self = Self(0b1000_0000);
     pub const Type64BitIndexing: Self = Self(0b1000_0000_0000_0000);
+    pub const IndependentSets: Self = Self(0b100_0000_0000_0000_0000);
 }
 
 /// <https://docs.vulkan.org/refpages/latest/refpages/source/VkTileShadingRenderPassFlagBitsQCOM.html>
@@ -2407,6 +2449,7 @@ vk_bitflags_wrapped!(PhysicalDeviceSchedulingControlsFlagsARM, Flags64);
 
 impl PhysicalDeviceSchedulingControlsFlagsARM {
     pub const ShaderCoreCount: Self = Self(0b1);
+    pub const DispatchParameters: Self = Self(0b10);
 }
 
 /// <https://docs.vulkan.org/refpages/latest/refpages/source/VkSurfaceCreateFlagsOHOS.html>
@@ -2449,6 +2492,76 @@ impl PresentTimingInfoFlagsEXT {
 
 /// <https://docs.vulkan.org/refpages/latest/refpages/source/VkPerformanceCounterDescriptionFlagsARM.html>
 pub type PerformanceCounterDescriptionFlagsARM = Flags;
+
+/// <https://docs.vulkan.org/refpages/latest/refpages/source/VkShaderInstrumentationValuesFlagsARM.html>
+pub type ShaderInstrumentationValuesFlagsARM = Flags;
+
+/// <https://docs.vulkan.org/refpages/latest/refpages/source/VkDataGraphTOSAQualityFlagBitsARM.html>
+#[repr(transparent)]
+#[derive(Clone, Copy, Hash, PartialEq, Eq)]
+pub struct DataGraphTOSAQualityFlagsARM(pub(crate) Flags);
+vk_bitflags_wrapped!(DataGraphTOSAQualityFlagsARM, Flags);
+
+impl DataGraphTOSAQualityFlagsARM {
+    pub const Accelerated: Self = Self(0b1);
+    pub const Conformant: Self = Self(0b10);
+    pub const Experimental: Self = Self(0b100);
+    pub const Deprecated: Self = Self(0b1000);
+}
+
+/// <https://docs.vulkan.org/refpages/latest/refpages/source/VkDataGraphOpticalFlowGridSizeFlagBitsARM.html>
+#[repr(transparent)]
+#[derive(Clone, Copy, Hash, PartialEq, Eq)]
+pub struct DataGraphOpticalFlowGridSizeFlagsARM(pub(crate) Flags);
+vk_bitflags_wrapped!(DataGraphOpticalFlowGridSizeFlagsARM, Flags);
+
+impl DataGraphOpticalFlowGridSizeFlagsARM {
+    pub const Unknown: Self = Self(0);
+    pub const Type1X1: Self = Self(0b1);
+    pub const Type2X2: Self = Self(0b10);
+    pub const Type4X4: Self = Self(0b100);
+    pub const Type8X8: Self = Self(0b1000);
+}
+
+/// <https://docs.vulkan.org/refpages/latest/refpages/source/VkDataGraphOpticalFlowImageUsageFlagBitsARM.html>
+#[repr(transparent)]
+#[derive(Clone, Copy, Hash, PartialEq, Eq)]
+pub struct DataGraphOpticalFlowImageUsageFlagsARM(pub(crate) Flags);
+vk_bitflags_wrapped!(DataGraphOpticalFlowImageUsageFlagsARM, Flags);
+
+impl DataGraphOpticalFlowImageUsageFlagsARM {
+    pub const Unknown: Self = Self(0);
+    pub const Input: Self = Self(0b1);
+    pub const Output: Self = Self(0b10);
+    pub const Hint: Self = Self(0b100);
+    pub const Cost: Self = Self(0b1000);
+}
+
+/// <https://docs.vulkan.org/refpages/latest/refpages/source/VkDataGraphOpticalFlowCreateFlagBitsARM.html>
+#[repr(transparent)]
+#[derive(Clone, Copy, Hash, PartialEq, Eq)]
+pub struct DataGraphOpticalFlowCreateFlagsARM(pub(crate) Flags);
+vk_bitflags_wrapped!(DataGraphOpticalFlowCreateFlagsARM, Flags);
+
+impl DataGraphOpticalFlowCreateFlagsARM {
+    pub const EnableHint: Self = Self(0b1);
+    pub const EnableCost: Self = Self(0b10);
+    pub const Reserved30: Self = Self(0b100_0000_0000_0000_0000_0000_0000_0000);
+}
+
+/// <https://docs.vulkan.org/refpages/latest/refpages/source/VkDataGraphOpticalFlowExecuteFlagBitsARM.html>
+#[repr(transparent)]
+#[derive(Clone, Copy, Hash, PartialEq, Eq)]
+pub struct DataGraphOpticalFlowExecuteFlagsARM(pub(crate) Flags);
+vk_bitflags_wrapped!(DataGraphOpticalFlowExecuteFlagsARM, Flags);
+
+impl DataGraphOpticalFlowExecuteFlagsARM {
+    pub const DisableTemporalHints: Self = Self(0b1);
+    pub const InputUnchanged: Self = Self(0b10);
+    pub const ReferenceUnchanged: Self = Self(0b100);
+    pub const InputIsPreviousReference: Self = Self(0b1000);
+    pub const ReferenceIsPreviousInput: Self = Self(0b1_0000);
+}
 
 /// <https://docs.vulkan.org/refpages/latest/refpages/source/VkVideoCodecOperationFlagBitsKHR.html>
 #[repr(transparent)]

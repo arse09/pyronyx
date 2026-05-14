@@ -5,6 +5,13 @@ pub mod render_pass_shader_resolve {
     pub const NAME: &CStr = c"VK_QCOM_render_pass_shader_resolve";
     pub const SPEC_VERSION: u32 = 4;
 }
+pub mod cooperative_matrix_conversion {
+    use core::ffi::CStr;
+
+    /// Type: `Device`
+    pub const NAME: &CStr = c"VK_QCOM_cooperative_matrix_conversion";
+    pub const SPEC_VERSION: u32 = 1;
+}
 pub mod render_pass_transform {
     use core::ffi::CStr;
 
@@ -19,6 +26,7 @@ pub mod render_pass_store_ops {
     pub const NAME: &CStr = c"VK_QCOM_render_pass_store_ops";
     pub const SPEC_VERSION: u32 = 2;
 }
+pub mod queue_perf_hint;
 pub mod tile_shading;
 pub mod rotated_copy_commands {
     use core::ffi::CStr;

@@ -236,6 +236,7 @@ pub mod extended_sparse_address_space {
     pub const SPEC_VERSION: u32 = 1;
 }
 pub mod low_latency2;
+#[deprecated = "This extension is deprecated. Use `VK_EXT_descriptor_heap` instead."]
 pub mod per_stage_descriptor_set {
     use core::ffi::CStr;
 

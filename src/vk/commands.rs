@@ -650,6 +650,9 @@ pub type vkCmdBindPipeline = unsafe extern "system" fn(
     pipeline: Pipeline,
 );
 
+pub type vkCmdSetPrimitiveRestartIndexEXT =
+    unsafe extern "system" fn(command_buffer: vkCommandBuffer, primitive_restart_index: u32);
+
 pub type vkCmdSetAttachmentFeedbackLoopEnableEXT =
     unsafe extern "system" fn(command_buffer: vkCommandBuffer, aspect_mask: ImageAspectFlags);
 
@@ -1202,6 +1205,19 @@ pub type vkGetPhysicalDeviceWaylandPresentationSupportKHR = unsafe extern "syste
     physical_device: vkPhysicalDevice,
     queue_family_index: u32,
     display: *mut wl_display,
+) -> Bool32;
+
+pub type vkCreateUbmSurfaceSEC = unsafe extern "system" fn(
+    instance: vkInstance,
+    create_info: *const UbmSurfaceCreateInfoSEC,
+    allocator: *const AllocationCallbacks,
+    surface: *mut SurfaceKHR,
+) -> vkResult;
+
+pub type vkGetPhysicalDeviceUbmPresentationSupportSEC = unsafe extern "system" fn(
+    physical_device: vkPhysicalDevice,
+    queue_family_index: u32,
+    device: *mut ubm_device,
 ) -> Bool32;
 
 pub type vkCreateWin32SurfaceKHR = unsafe extern "system" fn(
@@ -2664,7 +2680,7 @@ pub type vkDestroyAccelerationStructureNV = unsafe extern "system" fn(
 pub type vkGetAccelerationStructureMemoryRequirementsNV = unsafe extern "system" fn(
     device: vkDevice,
     info: *const AccelerationStructureMemoryRequirementsInfoNV,
-    memory_requirements: *mut MemoryRequirements2KHR,
+    memory_requirements: *mut MemoryRequirements2,
 );
 
 pub type vkBindAccelerationStructureMemoryNV = unsafe extern "system" fn(
@@ -4262,7 +4278,7 @@ pub type vkGetImageSubresourceLayout2EXT = unsafe extern "system" fn(
 
 pub type vkGetPipelinePropertiesEXT = unsafe extern "system" fn(
     device: vkDevice,
-    pipeline_info: *const PipelineInfoEXT,
+    pipeline_info: *const PipelineInfoKHR,
     pipeline_properties: *mut BaseOutStructure,
 ) -> vkResult;
 
@@ -4325,6 +4341,18 @@ pub type vkGetDeviceFaultInfoEXT = unsafe extern "system" fn(
     device: vkDevice,
     fault_counts: *mut DeviceFaultCountsEXT,
     fault_info: *mut DeviceFaultInfoEXT,
+) -> vkResult;
+
+pub type vkGetDeviceFaultReportsKHR = unsafe extern "system" fn(
+    device: vkDevice,
+    timeout: u64,
+    fault_counts: *mut u32,
+    fault_info: *mut DeviceFaultInfoKHR,
+) -> vkResult;
+
+pub type vkGetDeviceFaultDebugInfoKHR = unsafe extern "system" fn(
+    device: vkDevice,
+    debug_info: *mut DeviceFaultDebugInfoKHR,
 ) -> vkResult;
 
 pub type vkCmdSetDepthBias2EXT = unsafe extern "system" fn(
@@ -4660,6 +4688,45 @@ pub type vkGetExternalComputeQueueDataNV = unsafe extern "system" fn(
     data: *mut c_void,
 );
 
+pub type vkEnumeratePhysicalDeviceShaderInstrumentationMetricsARM =
+    unsafe extern "system" fn(
+        physical_device: vkPhysicalDevice,
+        description_count: *mut u32,
+        descriptions: *mut ShaderInstrumentationMetricDescriptionARM,
+    ) -> vkResult;
+
+pub type vkCreateShaderInstrumentationARM = unsafe extern "system" fn(
+    device: vkDevice,
+    create_info: *const ShaderInstrumentationCreateInfoARM,
+    allocator: *const AllocationCallbacks,
+    instrumentation: *mut ShaderInstrumentationARM,
+) -> vkResult;
+
+pub type vkDestroyShaderInstrumentationARM = unsafe extern "system" fn(
+    device: vkDevice,
+    instrumentation: ShaderInstrumentationARM,
+    allocator: *const AllocationCallbacks,
+);
+
+pub type vkCmdBeginShaderInstrumentationARM = unsafe extern "system" fn(
+    command_buffer: vkCommandBuffer,
+    instrumentation: ShaderInstrumentationARM,
+);
+
+pub type vkCmdEndShaderInstrumentationARM =
+    unsafe extern "system" fn(command_buffer: vkCommandBuffer);
+
+pub type vkGetShaderInstrumentationValuesARM = unsafe extern "system" fn(
+    device: vkDevice,
+    instrumentation: ShaderInstrumentationARM,
+    metric_block_count: *mut u32,
+    metric_values: *mut c_void,
+    flags: ShaderInstrumentationValuesFlagsARM,
+) -> vkResult;
+
+pub type vkClearShaderInstrumentationMetricsARM =
+    unsafe extern "system" fn(device: vkDevice, instrumentation: ShaderInstrumentationARM);
+
 pub type vkCreateTensorARM = unsafe extern "system" fn(
     device: vkDevice,
     create_info: *const TensorCreateInfoARM,
@@ -4812,6 +4879,9 @@ pub type vkGetMemoryNativeBufferOHOS = unsafe extern "system" fn(
     buffer: *mut *mut OH_NativeBuffer,
 ) -> vkResult;
 
+pub type vkQueueSetPerfHintQCOM =
+    unsafe extern "system" fn(queue: vkQueue, perf_hint_info: *const PerfHintInfoQCOM) -> vkResult;
+
 pub type vkEnumeratePhysicalDeviceQueueFamilyPerformanceCountersByRegionARM =
     unsafe extern "system" fn(
         physical_device: vkPhysicalDevice,
@@ -4878,3 +4948,152 @@ pub type vkGetTensorOpaqueCaptureDataARM = unsafe extern "system" fn(
     tensors: *const TensorARM,
     datas: *mut HostAddressRangeEXT,
 ) -> vkResult;
+
+pub type vkCmdCopyMemoryKHR = unsafe extern "system" fn(
+    command_buffer: vkCommandBuffer,
+    copy_memory_info: *const CopyDeviceMemoryInfoKHR,
+);
+
+pub type vkCmdCopyMemoryToImageKHR = unsafe extern "system" fn(
+    command_buffer: vkCommandBuffer,
+    copy_memory_info: *const CopyDeviceMemoryImageInfoKHR,
+);
+
+pub type vkCmdCopyImageToMemoryKHR = unsafe extern "system" fn(
+    command_buffer: vkCommandBuffer,
+    copy_memory_info: *const CopyDeviceMemoryImageInfoKHR,
+);
+
+pub type vkCmdUpdateMemoryKHR = unsafe extern "system" fn(
+    command_buffer: vkCommandBuffer,
+    dst_range: *const DeviceAddressRangeKHR,
+    dst_flags: AddressCommandFlagsKHR,
+    data_size: DeviceSize,
+    data: *const c_void,
+);
+
+pub type vkCmdFillMemoryKHR = unsafe extern "system" fn(
+    command_buffer: vkCommandBuffer,
+    dst_range: *const DeviceAddressRangeKHR,
+    dst_flags: AddressCommandFlagsKHR,
+    data: u32,
+);
+
+pub type vkCmdCopyQueryPoolResultsToMemoryKHR = unsafe extern "system" fn(
+    command_buffer: vkCommandBuffer,
+    query_pool: QueryPool,
+    first_query: u32,
+    query_count: u32,
+    dst_range: *const StridedDeviceAddressRangeKHR,
+    dst_flags: AddressCommandFlagsKHR,
+    query_result_flags: QueryResultFlags,
+);
+
+pub type vkCmdBeginConditionalRendering2EXT = unsafe extern "system" fn(
+    command_buffer: vkCommandBuffer,
+    conditional_rendering_begin: *const ConditionalRenderingBeginInfo2EXT,
+);
+
+pub type vkCmdBindTransformFeedbackBuffers2EXT = unsafe extern "system" fn(
+    command_buffer: vkCommandBuffer,
+    first_binding: u32,
+    binding_count: u32,
+    binding_infos: *const BindTransformFeedbackBuffer2InfoEXT,
+);
+
+pub type vkCmdBeginTransformFeedback2EXT = unsafe extern "system" fn(
+    command_buffer: vkCommandBuffer,
+    first_counter_range: u32,
+    counter_range_count: u32,
+    counter_infos: *const BindTransformFeedbackBuffer2InfoEXT,
+);
+
+pub type vkCmdEndTransformFeedback2EXT = unsafe extern "system" fn(
+    command_buffer: vkCommandBuffer,
+    first_counter_range: u32,
+    counter_range_count: u32,
+    counter_infos: *const BindTransformFeedbackBuffer2InfoEXT,
+);
+
+pub type vkCmdDrawIndirectByteCount2EXT = unsafe extern "system" fn(
+    command_buffer: vkCommandBuffer,
+    instance_count: u32,
+    first_instance: u32,
+    counter_info: *const BindTransformFeedbackBuffer2InfoEXT,
+    counter_offset: u32,
+    vertex_stride: u32,
+);
+
+pub type vkCmdWriteMarkerToMemoryAMD =
+    unsafe extern "system" fn(command_buffer: vkCommandBuffer, info: *const MemoryMarkerInfoAMD);
+
+pub type vkCmdBindIndexBuffer3KHR = unsafe extern "system" fn(
+    command_buffer: vkCommandBuffer,
+    info: *const BindIndexBuffer3InfoKHR,
+);
+
+pub type vkCmdBindVertexBuffers3KHR = unsafe extern "system" fn(
+    command_buffer: vkCommandBuffer,
+    first_binding: u32,
+    binding_count: u32,
+    binding_infos: *const BindVertexBuffer3InfoKHR,
+);
+
+pub type vkCmdDrawIndirect2KHR =
+    unsafe extern "system" fn(command_buffer: vkCommandBuffer, info: *const DrawIndirect2InfoKHR);
+
+pub type vkCmdDrawIndexedIndirect2KHR =
+    unsafe extern "system" fn(command_buffer: vkCommandBuffer, info: *const DrawIndirect2InfoKHR);
+
+pub type vkCmdDrawIndirectCount2KHR = unsafe extern "system" fn(
+    command_buffer: vkCommandBuffer,
+    info: *const DrawIndirectCount2InfoKHR,
+);
+
+pub type vkCmdDrawIndexedIndirectCount2KHR = unsafe extern "system" fn(
+    command_buffer: vkCommandBuffer,
+    info: *const DrawIndirectCount2InfoKHR,
+);
+
+pub type vkCmdDrawMeshTasksIndirect2EXT =
+    unsafe extern "system" fn(command_buffer: vkCommandBuffer, info: *const DrawIndirect2InfoKHR);
+
+pub type vkCmdDrawMeshTasksIndirectCount2EXT = unsafe extern "system" fn(
+    command_buffer: vkCommandBuffer,
+    info: *const DrawIndirectCount2InfoKHR,
+);
+
+pub type vkCmdDispatchIndirect2KHR = unsafe extern "system" fn(
+    command_buffer: vkCommandBuffer,
+    info: *const DispatchIndirect2InfoKHR,
+);
+
+pub type vkCreateAccelerationStructure2KHR = unsafe extern "system" fn(
+    device: vkDevice,
+    create_info: *const AccelerationStructureCreateInfo2KHR,
+    allocator: *const AllocationCallbacks,
+    acceleration_structure: *mut AccelerationStructureKHR,
+) -> vkResult;
+
+pub type vkGetPhysicalDeviceQueueFamilyDataGraphEngineOperationPropertiesARM =
+    unsafe extern "system" fn(
+        physical_device: vkPhysicalDevice,
+        queue_family_index: u32,
+        queue_family_data_graph_properties: *const QueueFamilyDataGraphPropertiesARM,
+        properties: *mut BaseOutStructure,
+    ) -> vkResult;
+
+pub type vkCmdSetDispatchParametersARM = unsafe extern "system" fn(
+    command_buffer: vkCommandBuffer,
+    dispatch_parameters: *const DispatchParametersARM,
+);
+
+pub type vkGetPhysicalDeviceQueueFamilyDataGraphOpticalFlowImageFormatsARM =
+    unsafe extern "system" fn(
+        physical_device: vkPhysicalDevice,
+        queue_family_index: u32,
+        queue_family_data_graph_properties: *const QueueFamilyDataGraphPropertiesARM,
+        optical_flow_image_format_info: *const DataGraphOpticalFlowImageFormatInfoARM,
+        format_count: *mut u32,
+        image_format_properties: *mut DataGraphOpticalFlowImageFormatPropertiesARM,
+    ) -> vkResult;

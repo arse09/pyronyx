@@ -31,7 +31,7 @@ pub trait RayTracingDevice {
     fn get_acceleration_structure_memory_requirements(
         &self,
         info: &AccelerationStructureMemoryRequirementsInfoNV,
-    ) -> MemoryRequirements2KHR<'_>;
+    ) -> MemoryRequirements2<'_>;
 
     fn bind_acceleration_structure_memory(
         &self,
@@ -121,7 +121,7 @@ impl RayTracingDevice for Device {
     fn get_acceleration_structure_memory_requirements(
         &self,
         info: &AccelerationStructureMemoryRequirementsInfoNV,
-    ) -> MemoryRequirements2KHR<'_> {
+    ) -> MemoryRequirements2<'_> {
         let mut out = MaybeUninit::uninit();
         let call = self
             .fns()

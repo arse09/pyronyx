@@ -54,3 +54,6 @@ pub struct NvSciSyncFence {
 pub type NvSciBufAttrList = *mut c_void;
 /// <https://docs.nvidia.com/drive/drive_os_5.1.6.1L/nvvib_docs/index.html#page/DRIVE_OS_Linux_SDK_Development_Guide/Graphics/graphics_nvscibuf.html>
 pub type NvSciBufObj = *mut c_void;
+
+pub type ubm_device = c_void;
+pub type ubm_surface = c_void;

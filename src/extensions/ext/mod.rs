@@ -738,7 +738,7 @@ pub mod ray_tracing_invocation_reorder {
 
     /// Type: `Device`
     pub const NAME: &CStr = c"VK_EXT_ray_tracing_invocation_reorder";
-    pub const SPEC_VERSION: u32 = 1;
+    pub const SPEC_VERSION: u32 = 2;
 }
 pub mod depth_clamp_control;
 pub mod external_memory_metal;
@@ -792,3 +792,4 @@ pub mod shader_subgroup_partitioned {
     pub const NAME: &CStr = c"VK_EXT_shader_subgroup_partitioned";
     pub const SPEC_VERSION: u32 = 1;
 }
+pub mod primitive_restart_index;

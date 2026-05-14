@@ -20,3 +20,10 @@ pub mod fragment_density_map_layered {
     pub const NAME: &CStr = c"VK_VALVE_fragment_density_map_layered";
     pub const SPEC_VERSION: u32 = 1;
 }
+pub mod shader_mixed_float_dot_product {
+    use core::ffi::CStr;
+
+    /// Type: `Device`
+    pub const NAME: &CStr = c"VK_VALVE_shader_mixed_float_dot_product";
+    pub const SPEC_VERSION: u32 = 1;
+}

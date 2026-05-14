@@ -142,10 +142,16 @@ impl Debug for SamplerCreateFlags {
 
 impl Display for PipelineLayoutCreateFlags {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
-        const BITS: &[(PipelineLayoutCreateFlags, &str)] = &[(
-            PipelineLayoutCreateFlags::IndependentSetsEXT,
-            "IndependentSetsEXT",
-        )];
+        const BITS: &[(PipelineLayoutCreateFlags, &str)] = &[
+            (
+                PipelineLayoutCreateFlags::IndependentSetsEXT,
+                "IndependentSetsEXT",
+            ),
+            (
+                PipelineLayoutCreateFlags::NoTaskShaderKHR,
+                "NoTaskShaderKHR",
+            ),
+        ];
 
         let mut first = true;
         for &(flag, name) in BITS {
@@ -879,6 +885,10 @@ impl Display for ImageCreateFlags {
             (
                 ImageCreateFlags::FragmentDensityMapOffsetEXT,
                 "FragmentDensityMapOffsetEXT",
+            ),
+            (
+                ImageCreateFlags::AliasSingleLayerDescriptorKHR,
+                "AliasSingleLayerDescriptorKHR",
             ),
         ];
 
@@ -2954,6 +2964,9 @@ impl Display for FormatFeatureFlags2 {
             (FormatFeatureFlags2::DepthCopyOnTransferQueueKHR, "DepthCopyOnTransferQueueKHR"),
             (FormatFeatureFlags2::StencilCopyOnComputeQueueKHR, "StencilCopyOnComputeQueueKHR"),
             (FormatFeatureFlags2::StencilCopyOnTransferQueueKHR, "StencilCopyOnTransferQueueKHR"),
+            (FormatFeatureFlags2::DataGraphOpticalFlowImageARM, "DataGraphOpticalFlowImageARM"),
+            (FormatFeatureFlags2::DataGraphOpticalFlowVectorARM, "DataGraphOpticalFlowVectorARM"),
+            (FormatFeatureFlags2::DataGraphOpticalFlowCostARM, "DataGraphOpticalFlowCostARM"),
         ];
 
         let mut first = true;
@@ -3051,6 +3064,46 @@ impl Display for MemoryDecompressionMethodFlagsEXT {
 }
 
 impl Debug for MemoryDecompressionMethodFlagsEXT {
+    fn fmt(&self, f: &mut Formatter<'_>) -> Result {
+        Display::fmt(self, f)
+    }
+}
+
+impl Display for DeviceFaultFlagsKHR {
+    fn fmt(&self, f: &mut Formatter<'_>) -> Result {
+        const BITS: &[(DeviceFaultFlagsKHR, &str)] = &[
+            (DeviceFaultFlagsKHR::FlagDeviceLost, "FlagDeviceLost"),
+            (DeviceFaultFlagsKHR::FlagMemoryAddress, "FlagMemoryAddress"),
+            (
+                DeviceFaultFlagsKHR::FlagInstructionAddress,
+                "FlagInstructionAddress",
+            ),
+            (DeviceFaultFlagsKHR::FlagVendor, "FlagVendor"),
+            (
+                DeviceFaultFlagsKHR::FlagWatchdogTimeout,
+                "FlagWatchdogTimeout",
+            ),
+            (DeviceFaultFlagsKHR::FlagOverflow, "FlagOverflow"),
+        ];
+
+        let mut first = true;
+        for &(flag, name) in BITS {
+            if self.contains(flag) {
+                if !first {
+                    f.write_str(" | ")?;
+                }
+                f.write_str(name)?;
+                first = false;
+            }
+        }
+        if first {
+            f.write_str("0")?;
+        }
+        Ok(())
+    }
+}
+
+impl Debug for DeviceFaultFlagsKHR {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
         Display::fmt(self, f)
     }
@@ -3314,6 +3367,10 @@ impl Display for PipelineCreateFlags2 {
             (
                 PipelineCreateFlags2::DisallowOpacityMicromapARM,
                 "DisallowOpacityMicromapARM",
+            ),
+            (
+                PipelineCreateFlags2::InstrumentShadersARM,
+                "InstrumentShadersARM",
             ),
             (PipelineCreateFlags2::CaptureDataKHR, "CaptureDataKHR"),
             (
@@ -3595,10 +3652,16 @@ impl Debug for TensorViewCreateFlagsARM {
 
 impl Display for DataGraphPipelineSessionCreateFlagsARM {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
-        const BITS: &[(DataGraphPipelineSessionCreateFlagsARM, &str)] = &[(
-            DataGraphPipelineSessionCreateFlagsARM::Protected,
-            "Protected",
-        )];
+        const BITS: &[(DataGraphPipelineSessionCreateFlagsARM, &str)] = &[
+            (
+                DataGraphPipelineSessionCreateFlagsARM::Protected,
+                "Protected",
+            ),
+            (
+                DataGraphPipelineSessionCreateFlagsARM::OpticalFlowCache,
+                "OpticalFlowCache",
+            ),
+        ];
 
         let mut first = true;
         for &(flag, name) in BITS {
@@ -3798,6 +3861,52 @@ impl Display for SpirvResourceTypeFlagsEXT {
 }
 
 impl Debug for SpirvResourceTypeFlagsEXT {
+    fn fmt(&self, f: &mut Formatter<'_>) -> Result {
+        Display::fmt(self, f)
+    }
+}
+
+impl Display for AddressCommandFlagsKHR {
+    fn fmt(&self, f: &mut Formatter<'_>) -> Result {
+        const BITS: &[(AddressCommandFlagsKHR, &str)] = &[
+            (AddressCommandFlagsKHR::Protected, "Protected"),
+            (AddressCommandFlagsKHR::FullyBound, "FullyBound"),
+            (
+                AddressCommandFlagsKHR::StorageBufferUsage,
+                "StorageBufferUsage",
+            ),
+            (
+                AddressCommandFlagsKHR::UnknownStorageBufferUsage,
+                "UnknownStorageBufferUsage",
+            ),
+            (
+                AddressCommandFlagsKHR::TransformFeedbackBufferUsage,
+                "TransformFeedbackBufferUsage",
+            ),
+            (
+                AddressCommandFlagsKHR::UnknownTransformFeedbackBufferUsage,
+                "UnknownTransformFeedbackBufferUsage",
+            ),
+        ];
+
+        let mut first = true;
+        for &(flag, name) in BITS {
+            if self.contains(flag) {
+                if !first {
+                    f.write_str(" | ")?;
+                }
+                f.write_str(name)?;
+                first = false;
+            }
+        }
+        if first {
+            f.write_str("0")?;
+        }
+        Ok(())
+    }
+}
+
+impl Debug for AddressCommandFlagsKHR {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
         Display::fmt(self, f)
     }
@@ -5422,6 +5531,7 @@ impl Display for ShaderCreateFlagsEXT {
         const BITS: &[(ShaderCreateFlagsEXT, &str)] = &[
             (ShaderCreateFlagsEXT::LinkStage, "LinkStage"),
             (ShaderCreateFlagsEXT::DescriptorHeap, "DescriptorHeap"),
+            (ShaderCreateFlagsEXT::InstrumentShader, "InstrumentShader"),
             (
                 ShaderCreateFlagsEXT::AllowVaryingSubgroupSize,
                 "AllowVaryingSubgroupSize",
@@ -5442,6 +5552,7 @@ impl Display for ShaderCreateFlagsEXT {
             ),
             (ShaderCreateFlagsEXT::IndirectBindable, "IndirectBindable"),
             (ShaderCreateFlagsEXT::Type64BitIndexing, "Type64BitIndexing"),
+            (ShaderCreateFlagsEXT::IndependentSets, "IndependentSets"),
         ];
 
         let mut first = true;
@@ -5502,10 +5613,16 @@ impl Debug for TileShadingRenderPassFlagsQCOM {
 
 impl Display for PhysicalDeviceSchedulingControlsFlagsARM {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
-        const BITS: &[(PhysicalDeviceSchedulingControlsFlagsARM, &str)] = &[(
-            PhysicalDeviceSchedulingControlsFlagsARM::ShaderCoreCount,
-            "ShaderCoreCount",
-        )];
+        const BITS: &[(PhysicalDeviceSchedulingControlsFlagsARM, &str)] = &[
+            (
+                PhysicalDeviceSchedulingControlsFlagsARM::ShaderCoreCount,
+                "ShaderCoreCount",
+            ),
+            (
+                PhysicalDeviceSchedulingControlsFlagsARM::DispatchParameters,
+                "DispatchParameters",
+            ),
+        ];
 
         let mut first = true;
         for &(flag, name) in BITS {
@@ -5638,6 +5755,183 @@ impl Display for PresentTimingInfoFlagsEXT {
 }
 
 impl Debug for PresentTimingInfoFlagsEXT {
+    fn fmt(&self, f: &mut Formatter<'_>) -> Result {
+        Display::fmt(self, f)
+    }
+}
+
+impl Display for DataGraphTOSAQualityFlagsARM {
+    fn fmt(&self, f: &mut Formatter<'_>) -> Result {
+        const BITS: &[(DataGraphTOSAQualityFlagsARM, &str)] = &[
+            (DataGraphTOSAQualityFlagsARM::Accelerated, "Accelerated"),
+            (DataGraphTOSAQualityFlagsARM::Conformant, "Conformant"),
+            (DataGraphTOSAQualityFlagsARM::Experimental, "Experimental"),
+            (DataGraphTOSAQualityFlagsARM::Deprecated, "Deprecated"),
+        ];
+
+        let mut first = true;
+        for &(flag, name) in BITS {
+            if self.contains(flag) {
+                if !first {
+                    f.write_str(" | ")?;
+                }
+                f.write_str(name)?;
+                first = false;
+            }
+        }
+        if first {
+            f.write_str("0")?;
+        }
+        Ok(())
+    }
+}
+
+impl Debug for DataGraphTOSAQualityFlagsARM {
+    fn fmt(&self, f: &mut Formatter<'_>) -> Result {
+        Display::fmt(self, f)
+    }
+}
+
+impl Display for DataGraphOpticalFlowGridSizeFlagsARM {
+    fn fmt(&self, f: &mut Formatter<'_>) -> Result {
+        const BITS: &[(DataGraphOpticalFlowGridSizeFlagsARM, &str)] = &[
+            (DataGraphOpticalFlowGridSizeFlagsARM::Unknown, "Unknown"),
+            (DataGraphOpticalFlowGridSizeFlagsARM::Type1X1, "Type1X1"),
+            (DataGraphOpticalFlowGridSizeFlagsARM::Type2X2, "Type2X2"),
+            (DataGraphOpticalFlowGridSizeFlagsARM::Type4X4, "Type4X4"),
+            (DataGraphOpticalFlowGridSizeFlagsARM::Type8X8, "Type8X8"),
+        ];
+
+        let mut first = true;
+        for &(flag, name) in BITS {
+            if self.contains(flag) {
+                if !first {
+                    f.write_str(" | ")?;
+                }
+                f.write_str(name)?;
+                first = false;
+            }
+        }
+        if first {
+            f.write_str("0")?;
+        }
+        Ok(())
+    }
+}
+
+impl Debug for DataGraphOpticalFlowGridSizeFlagsARM {
+    fn fmt(&self, f: &mut Formatter<'_>) -> Result {
+        Display::fmt(self, f)
+    }
+}
+
+impl Display for DataGraphOpticalFlowImageUsageFlagsARM {
+    fn fmt(&self, f: &mut Formatter<'_>) -> Result {
+        const BITS: &[(DataGraphOpticalFlowImageUsageFlagsARM, &str)] = &[
+            (DataGraphOpticalFlowImageUsageFlagsARM::Unknown, "Unknown"),
+            (DataGraphOpticalFlowImageUsageFlagsARM::Input, "Input"),
+            (DataGraphOpticalFlowImageUsageFlagsARM::Output, "Output"),
+            (DataGraphOpticalFlowImageUsageFlagsARM::Hint, "Hint"),
+            (DataGraphOpticalFlowImageUsageFlagsARM::Cost, "Cost"),
+        ];
+
+        let mut first = true;
+        for &(flag, name) in BITS {
+            if self.contains(flag) {
+                if !first {
+                    f.write_str(" | ")?;
+                }
+                f.write_str(name)?;
+                first = false;
+            }
+        }
+        if first {
+            f.write_str("0")?;
+        }
+        Ok(())
+    }
+}
+
+impl Debug for DataGraphOpticalFlowImageUsageFlagsARM {
+    fn fmt(&self, f: &mut Formatter<'_>) -> Result {
+        Display::fmt(self, f)
+    }
+}
+
+impl Display for DataGraphOpticalFlowCreateFlagsARM {
+    fn fmt(&self, f: &mut Formatter<'_>) -> Result {
+        const BITS: &[(DataGraphOpticalFlowCreateFlagsARM, &str)] = &[
+            (DataGraphOpticalFlowCreateFlagsARM::EnableHint, "EnableHint"),
+            (DataGraphOpticalFlowCreateFlagsARM::EnableCost, "EnableCost"),
+            (DataGraphOpticalFlowCreateFlagsARM::Reserved30, "Reserved30"),
+        ];
+
+        let mut first = true;
+        for &(flag, name) in BITS {
+            if self.contains(flag) {
+                if !first {
+                    f.write_str(" | ")?;
+                }
+                f.write_str(name)?;
+                first = false;
+            }
+        }
+        if first {
+            f.write_str("0")?;
+        }
+        Ok(())
+    }
+}
+
+impl Debug for DataGraphOpticalFlowCreateFlagsARM {
+    fn fmt(&self, f: &mut Formatter<'_>) -> Result {
+        Display::fmt(self, f)
+    }
+}
+
+impl Display for DataGraphOpticalFlowExecuteFlagsARM {
+    fn fmt(&self, f: &mut Formatter<'_>) -> Result {
+        const BITS: &[(DataGraphOpticalFlowExecuteFlagsARM, &str)] = &[
+            (
+                DataGraphOpticalFlowExecuteFlagsARM::DisableTemporalHints,
+                "DisableTemporalHints",
+            ),
+            (
+                DataGraphOpticalFlowExecuteFlagsARM::InputUnchanged,
+                "InputUnchanged",
+            ),
+            (
+                DataGraphOpticalFlowExecuteFlagsARM::ReferenceUnchanged,
+                "ReferenceUnchanged",
+            ),
+            (
+                DataGraphOpticalFlowExecuteFlagsARM::InputIsPreviousReference,
+                "InputIsPreviousReference",
+            ),
+            (
+                DataGraphOpticalFlowExecuteFlagsARM::ReferenceIsPreviousInput,
+                "ReferenceIsPreviousInput",
+            ),
+        ];
+
+        let mut first = true;
+        for &(flag, name) in BITS {
+            if self.contains(flag) {
+                if !first {
+                    f.write_str(" | ")?;
+                }
+                f.write_str(name)?;
+                first = false;
+            }
+        }
+        if first {
+            f.write_str("0")?;
+        }
+        Ok(())
+    }
+}
+
+impl Debug for DataGraphOpticalFlowExecuteFlagsARM {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
         Display::fmt(self, f)
     }
