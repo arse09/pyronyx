@@ -148,6 +148,19 @@ Hello Triangle: [pyronyx Triangle](https://github.com/unschlagbar/pyronyx-triang
 
 ![Hello Triangle](https://raw.githubusercontent.com/unschlagbar/pyronyx-triangle/main/image.png)
 
+## Generating bindings with pyronyx-gen
+
+The `pyronyx-gen` crate generates the Vulkan bindings into `pyronyx/src/` from `vk.xml` and `video.xml`.
+
+From the workspace root, run:
+
+```bash
+export VULKAN_SDK=/path/to/VulkanSDK
+cargo run -p pyronyx-gen
+```
+
+That will regenerate the code and automatically run `cargo fmt` in `pyronyx`.
+
 ---
 
 ## License

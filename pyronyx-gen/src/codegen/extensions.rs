@@ -1,0 +1,212 @@
+use std::{collections::HashSet, fs};
+
+use super::{Writer, file_header};
+use crate::{
+    codegen::{
+        HAND_WRITTEN_FNS, const_name,
+        impls::{ImplTarget, write_command_signature, write_command_wrapper},
+    },
+    parse::{self, registry::Registry},
+};
+use heck::ToPascalCase;
+use indexmap::{IndexMap, IndexSet};
+use parse::registry::VkCommand;
+
+pub fn generate(registry: &Registry, out_path: &str, lifetimes: &HashSet<String>) {
+    let mut extensions = IndexMap::new();
+    for extension in &registry.extensions {
+        if extension.disabled {
+            continue;
+        }
+        let name = const_name(&extension.name).to_string();
+        let vendor = name.split_once('_').unwrap().0;
+
+        if !extensions.contains_key(vendor) {
+            extensions.insert(vendor.to_string(), Vec::new());
+        }
+
+        let folder = extensions.get_mut(vendor).unwrap();
+        folder.push(extension.name.to_string());
+    }
+
+    let mut outer_mod_rs = Writer::new();
+
+    for (name, vendor_ext) in extensions.into_iter() {
+        let lower_name = name.to_lowercase();
+        let folder_name = format!("{out_path}/{lower_name}");
+
+        let mut mod_rs = Writer::new();
+
+        for extension in vendor_ext {
+            let name = move_digits_to_end(const_name(&extension).split_once('_').unwrap().1);
+
+            generate_extension(
+                &mut mod_rs,
+                registry,
+                extension,
+                &name,
+                &format!("{folder_name}/{name}.rs"),
+                lifetimes,
+            );
+        }
+
+        if mod_rs.len() != 0 {
+            outer_mod_rs.ln(&format!("pub mod {lower_name};"));
+            if fs::read_dir(&folder_name).is_err() {
+                fs::create_dir(&folder_name).unwrap();
+            }
+            mod_rs.save(format!("{folder_name}/mod.rs"));
+        }
+    }
+    outer_mod_rs.save(format!("{out_path}/mod.rs"));
+}
+
+fn generate_extension(
+    mod_rs: &mut Writer,
+    registry: &Registry,
+    extension: String,
+    orig_name: &str,
+    path: &str,
+    lifetimes: &HashSet<String>,
+) {
+    let name = orig_name.to_pascal_case();
+    let mut w = Writer::new();
+
+    file_header(&mut w, "generated extensions");
+    w.blank();
+
+    let len = w.len();
+    generate_impl(
+        registry, extension, name, orig_name, &mut w, mod_rs, lifetimes,
+    );
+
+    if w.len() != len {
+        w.save(path);
+        mod_rs.ln(&format!("pub mod {orig_name};"));
+    }
+}
+
+pub fn generate_impl(
+    registry: &Registry,
+    extension: String,
+    name: String,
+    orig_name: &str,
+    w: &mut Writer,
+    mod_rs: &mut Writer,
+    lifetimes: &HashSet<String>,
+) {
+    let mut by_target: IndexMap<ImplTarget, Vec<&VkCommand>> = IndexMap::new();
+
+    for (_, cmd) in &registry.commands {
+        if cmd.alias.is_some() || cmd.extension.as_ref() != Some(&extension) {
+            continue;
+        }
+        if let Some(target) = cmd.target {
+            by_target.entry(target).or_default().push(cmd);
+        }
+    }
+    let mut inner_w = Writer::new();
+
+    if by_target.is_empty() {
+        if let Some(ext) = registry.extensions.iter().find(|e| e.name == extension) {
+            if let Some(deprecated) = &ext.deprecated_by {
+                mod_rs.ln(&format!(
+                    "#[deprecated = \"This extension is deprecated. Use `{}` instead.\"]",
+                    deprecated
+                ));
+            }
+            mod_rs.ln(&format!("pub mod {orig_name}{{"));
+            mod_rs.ln("use core::ffi::CStr;\n
+            ");
+
+            if !ext.typ.is_empty() {
+                mod_rs.ln(&format!("/// Type: `{}`", ext.typ.to_pascal_case()));
+            }
+            mod_rs.ln(&format!("pub const NAME: &CStr = c\"{}\";", extension));
+            mod_rs.ln(&format!(
+                "pub const SPEC_VERSION: u32 = {};",
+                ext.spec_version
+            ));
+            mod_rs.ln("}");
+        }
+        return;
+    } else {
+        if let Some(ext) = registry.extensions.iter().find(|e| e.name == extension) {
+            if !ext.typ.is_empty() {
+                inner_w.ln(&format!("/// Type: `{}`", ext.typ.to_pascal_case()));
+            }
+
+            if let Some(deprecated) = &ext.deprecated_by {
+                w.ln(&format!(
+                    "#![deprecated = \"This extension is deprecated. Use `{}` instead.\"]",
+                    deprecated
+                ));
+            }
+            inner_w.ln(&format!("pub const NAME: &CStr = c\"{}\";", extension));
+            inner_w.ln(&format!(
+                "pub const SPEC_VERSION: u32 = {};",
+                ext.spec_version
+            ));
+        }
+    };
+
+    let mut imports = IndexSet::new();
+    imports.insert("use core::ffi::CStr;");
+    w.ln("use crate::vk::*;");
+
+    for (target, cmds) in by_target {
+        inner_w.blank();
+
+        let target_name = target.struct_name();
+        let tar_str = target_name; // du hattest needs_target = true
+
+        inner_w.ln(&format!("pub trait {name}{tar_str} {{"));
+        for cmd in &cmds {
+            if !HAND_WRITTEN_FNS
+                .iter()
+                .any(|(tar, n)| *tar == target_name && n == &cmd.name)
+            {
+                write_command_signature(&mut inner_w, &target, cmd, lifetimes);
+            }
+        }
+        inner_w.ln("}");
+
+        inner_w.blank();
+        inner_w.ln(&format!("impl {name}{tar_str} for {} {{", target_name));
+
+        for cmd in &cmds {
+            if !HAND_WRITTEN_FNS
+                .iter()
+                .any(|(tar, n)| *tar == target_name && n == &cmd.name)
+            {
+                write_command_wrapper(&mut inner_w, &target, cmd, "", &mut imports, lifetimes);
+            }
+        }
+
+        inner_w.ln("}");
+    }
+
+    for import in imports {
+        w.ln(import);
+    }
+    w.blank();
+    w.ln(&inner_w.into_string());
+}
+
+fn move_digits_to_end(s: &str) -> String {
+    s.char_indices()
+        .find(|(_, c)| !c.is_ascii_digit())
+        .map(|(i, _)| {
+            if i == 0 {
+                s.to_string()
+            } else {
+                let (digits, rest) = s.split_at(i);
+                format!(
+                    "{}_{}",
+                    rest.strip_prefix("_").unwrap_or(rest),
+                    digits.strip_suffix("_").unwrap_or(digits)
+                )
+            }
+        })
+        .unwrap_or(s.to_string())
+}
