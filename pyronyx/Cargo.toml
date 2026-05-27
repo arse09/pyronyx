@@ -1,0 +1,24 @@
+[package]
+name = "pyronyx"
+version = "0.2.5+1.4.350"
+edition = "2024"
+rust-version = "1.85.0"
+license = "MIT"
+repository = "https://github.com/unschlagbar/pyronyx"
+readme = "README.md"
+keywords = ["gamedev", "graphics", "vulkan", "bindings"]
+description = "Better Vulkan bindings for Rust"
+categories = [
+    "api-bindings",
+    "external-ffi-bindings",
+    "game-development",
+    "graphics",
+    "rendering::graphics-api",
+]
+
+[dependencies]
+raw-window-handle = { version = "0.6.2", optional = true }
+
+[features]
+default = []
+rwh_06 = ["raw-window-handle"]
