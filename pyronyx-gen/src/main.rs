@@ -4,8 +4,8 @@ mod parse;
 use parse::registry::Registry;
 use std::{collections::HashSet, fs, process::Command};
 
-pub const VK_OUT: &str = "../pyronyx/src/vk";
-pub const OUT: &str = "../pyronyx/src";
+pub const VK_OUT: &str = "pyronyx/src/vk";
+pub const OUT: &str = "pyronyx/src";
 
 pub const VULKAN_SDK: &str = env!("VULKAN_SDK");
 const VK_XML: &str = "/share/vulkan/registry/vk.xml";

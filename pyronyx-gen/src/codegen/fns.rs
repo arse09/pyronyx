@@ -199,9 +199,7 @@ fn extract_pointer(ty: &str) -> &str {
 
 fn result_ty(ty: &str, lifetimes: &HashSet<String>) -> String {
     let clean = ty.split(' ').next_back().unwrap();
-    dbg!(clean);
     if lifetimes.contains(clean) {
-        dbg!("yes");
         format!("{ty}<'_>")
     } else {
         ty.to_string()
