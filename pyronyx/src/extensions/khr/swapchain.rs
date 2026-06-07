@@ -118,13 +118,13 @@ impl SwapchainDevice for Device {
 }
 
 pub trait SwapchainQueue {
-    fn present(&self, present_info: &PresentInfoKHR) -> Result<Suboptimal<()>>;
+    fn present(&self, present_info: &PresentInfoKHR) -> Result<()>;
 }
 
 impl SwapchainQueue for Queue {
     /// <https://docs.vulkan.org/refpages/latest/refpages/source/vkQueuePresentKHR.html>
     #[inline]
-    fn present(&self, present_info: &PresentInfoKHR) -> Result<Suboptimal<()>> {
+    fn present(&self, present_info: &PresentInfoKHR) -> Result<()> {
         let call = self
             .fns()
             .khr_swapchain
@@ -132,6 +132,6 @@ impl SwapchainQueue for Queue {
             .expect(Self::EXT_LOAD_ERROR)
             .queue_present_khr;
 
-        unsafe { (call)(self.handle, present_info) }.result_or_suboptimal()
+        unsafe { (call)(self.handle, present_info) }.result()
     }
 }
