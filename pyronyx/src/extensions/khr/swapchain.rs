@@ -30,7 +30,7 @@ pub trait SwapchainDevice {
         timeout: u64,
         semaphore: Semaphore,
         fence: Fence,
-    ) -> Result<u32>;
+    ) -> Result<Suboptimal<u32>>;
 }
 
 impl SwapchainDevice for Device {
@@ -94,7 +94,7 @@ impl SwapchainDevice for Device {
         timeout: u64,
         semaphore: Semaphore,
         fence: Fence,
-    ) -> Result<u32> {
+    ) -> Result<Suboptimal<u32>> {
         let mut out = MaybeUninit::uninit();
         let call = self
             .fns()
@@ -113,18 +113,18 @@ impl SwapchainDevice for Device {
                 out.as_mut_ptr(),
             )
         }
-        .init_on_success(out)
+        .init_on_success_or_suboptimal(out)
     }
 }
 
 pub trait SwapchainQueue {
-    fn present(&self, present_info: &PresentInfoKHR) -> Result<()>;
+    fn present(&self, present_info: &PresentInfoKHR) -> Result<Suboptimal<()>>;
 }
 
 impl SwapchainQueue for Queue {
     /// <https://docs.vulkan.org/refpages/latest/refpages/source/vkQueuePresentKHR.html>
     #[inline]
-    fn present(&self, present_info: &PresentInfoKHR) -> Result<()> {
+    fn present(&self, present_info: &PresentInfoKHR) -> Result<Suboptimal<()>> {
         let call = self
             .fns()
             .khr_swapchain
@@ -132,6 +132,6 @@ impl SwapchainQueue for Queue {
             .expect(Self::EXT_LOAD_ERROR)
             .queue_present_khr;
 
-        unsafe { (call)(self.handle, present_info) }.result()
+        unsafe { (call)(self.handle, present_info) }.result_or_suboptimal()
     }
 }
